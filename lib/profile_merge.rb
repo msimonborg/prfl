@@ -7,6 +7,22 @@ require_relative 'profile_merge/version'
 module ProfileMerge
   class Error < StandardError; end
 
+  class Config
+    attr_accessor :artisan_path
+    attr_accessor :boost_path
+    attr_accessor :target_path
+    attr_accessor :artisan_files
+    attr_accessor :boost_files
+  end
+
+  @@config = false
+
+  def self.config(&block)
+    return @@config unless block_given?
+    @@config ||= Config.new
+    block.call(@@config)
+  end
+
   def self.execute(boost_filename, artisan_filename, target_filename)
     boost_data = BoostData.new(boost_filename)
     artisan_data = ArtisanData.new(artisan_filename)

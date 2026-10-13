@@ -6,14 +6,47 @@ require 'profile_merge'
 
 require_relative '../config.rb'
 
-file_sets = ARTISAN_FILES.map do |filename|
-  index = ARTISAN_FILES.index(filename)
-  boost_file = BOOST_PATH + BOOST_FILES[index]
-  artisan_file = ARTISAN_PATH + filename
-  target_file = TARGET_PATH + filename
+config = ProfileMerge.config
+
+file_sets = config.artisan_files.map do |filename|
+  index = config.artisan_files.index(filename)
+  boost_file = config.boost_path + config.boost_files[index]
+  artisan_file = config.artisan_path + filename
+  target_file = config.target_path + filename
   [boost_file, artisan_file, target_file]
 end
 
 file_sets.each do |file_set|
   ProfileMerge.execute(*file_set)
+end
+
+history = 
+  if File.exist?('history')
+    File.read('history')
+  else
+    ''
+  end
+
+artisan_dir = Dir.new(config.artisan_path)
+
+batch_numbers = []
+
+artisan_files =
+  artisan_dir.children.select do |child|
+    match = child.match(/#\d{4}/)
+    batch_number = match.to_s.sub('#', '') if match
+    if batch_number && !history.match(batch_number)
+      batch_numbers.push(batch_number)
+    else
+      # filter out the file
+      false
+    end
+  end
+
+File.open('history', 'a') do |file|
+  i = 0
+  batch_numbers.each do |num|
+    file.write("#{num} - #{config.target_path}#{artisan_files[i]}\n")
+    i += 1
+  end
 end

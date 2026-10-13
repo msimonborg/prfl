@@ -1,0 +1,19 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require 'bundler/setup'
+require 'profile_merge'
+
+require_relative '../config.rb'
+
+file_sets = ARTISAN_FILES.map do |filename|
+  index = ARTISAN_FILES.index(filename)
+  boost_file = BOOST_PATH + BOOST_FILES[index]
+  artisan_file = ARTISAN_PATH + filename
+  target_file = TARGET_PATH + filename
+  [boost_file, artisan_file, target_file]
+end
+
+file_sets.each do |file_set|
+  ProfileMerge.execute(*file_set)
+end

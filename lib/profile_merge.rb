@@ -11,8 +11,6 @@ module ProfileMerge
     attr_accessor :artisan_path
     attr_accessor :boost_path
     attr_accessor :target_path
-    attr_accessor :artisan_files
-    attr_accessor :boost_files
   end
 
   @@config = false
@@ -23,9 +21,9 @@ module ProfileMerge
     block.call(@@config)
   end
 
-  def self.execute(boost_filename, artisan_filename, target_filename)
+  def self.execute(artisan_filename, boost_filename, target_filename, calibrate=false)
+    artisan_data = ArtisanData.new(artisan_filename, calibrate: calibrate)
     boost_data = BoostData.new(boost_filename)
-    artisan_data = ArtisanData.new(artisan_filename)
     artisan_data.merge_boost_data(boost_data)
     File.write(target_filename, artisan_data.convert_to_raw)
   end

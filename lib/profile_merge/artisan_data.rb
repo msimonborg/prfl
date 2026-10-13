@@ -33,14 +33,14 @@ module ProfileMerge
     attr_accessor :data
     attr_accessor :drop_index
 
-    def initialize(filename)
+    def initialize(filename, calibrate: calibrate)
       self.source = File.read(filename)
       self.data = self.parse_source
 
       time_index = self.data["timeindex"]
       self.drop_index = time_index[6]
 
-      # self.calibrate_bt
+      self.calibrate_bt if calibrate
     end
 
     def merge_boost_data(boost_data)
@@ -79,6 +79,7 @@ module ProfileMerge
       self.data["extradrawstyles1"].insert(1, *EXTRA_DRAW_STYLES)
       self.data["extradrawstyles2"].insert(1, *EXTRA_DRAW_STYLES)
 
+      self.data["extraCurveVisibility1"] = (1..10).map { |_| true }
       self.data["extraCurveVisibility2"] = EXTRA_CURVE_VISIBILITY
       self.data["extraDelta2"] = EXTRA_CURVE_VISIBILITY
 

@@ -27,26 +27,34 @@ if arg and arg.match?(/\d{4,}/)
   else
     get_profile_metadata =
       lambda do |roast_count=20|
-        `
-        curl 'https://boost.stronghold.coffee/rstry/profile/status/list.sq?rc=w0&prodCd=10006&page=1&pageSetCnt=#{roast_count}&minRstTime=0&maxRstTime=1800&prflName=&grnBeanName=' \
-        -X 'GET' \
-        -H 'Accept: application/json, text/javascript, */*; q=0.01' \
-        -H 'Sec-Fetch-Site: same-origin' \
-        -H 'Accept-Language: en-US,en;q=0.9' \
-        -H 'Accept-Encoding: gzip, deflate, br, zstd' \
-        -H 'Sec-Fetch-Mode: cors' \
-        -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3 Safari/605.1.15' \
-        -H 'Referer: https://boost.stronghold.coffee/rstry/prfl.sq?rc=w0&lang=en' \
-        -H 'Connection: keep-alive' \
-        -H 'Cookie: lang=en; boost=#{CONFIG.boost_cookie}' \
-        -H 'Sec-Fetch-Dest: empty' \
-        -H 'X-Requested-With: XMLHttpRequest' \
-        -H 'Priority: u=3, i'
-        `
+        response =
+          `
+          curl 'https://boost.stronghold.coffee/rstry/profile/status/list.sq?rc=w0&prodCd=10006&page=1&pageSetCnt=#{roast_count}&minRstTime=0&maxRstTime=1800&prflName=&grnBeanName=' \
+          -X 'GET' \
+          -H 'Accept: application/json, text/javascript, */*; q=0.01' \
+          -H 'Sec-Fetch-Site: same-origin' \
+          -H 'Accept-Language: en-US,en;q=0.9' \
+          -H 'Accept-Encoding: gzip, deflate, br, zstd' \
+          -H 'Sec-Fetch-Mode: cors' \
+          -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3 Safari/605.1.15' \
+          -H 'Referer: https://boost.stronghold.coffee/rstry/prfl.sq?rc=w0&lang=en' \
+          -H 'Connection: keep-alive' \
+          -H 'Cookie: lang=en; boost=#{CONFIG.boost_cookie}' \
+          -H 'Sec-Fetch-Dest: empty' \
+          -H 'X-Requested-With: XMLHttpRequest' \
+          -H 'Priority: u=3, i'
+          `
+        
+        if response.empty?
+          raise ProfileMerge::BoostError,
+            "No response from Boost server. Make sure the cookie is valid."
+        else
+          response
+        end
       end
 
-    res = get_profile_metadata.call
-    profile_metadata = JSON.parse(res)
+    response = get_profile_metadata.call
+    profile_metadata = JSON.parse(response)
     total_roast_count = profile_metadata['totalRstCnt']
 
     profile =

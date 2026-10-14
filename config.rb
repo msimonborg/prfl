@@ -8,5 +8,5 @@ ProfileMerge.config do |config|
   config.artisan_path = lookup_path.call('roasts')
   config.boost_path = lookup_path.call('boost data/raw')
   config.target_path = lookup_path.call('roasts/merged')
-  config.boost_cookie = '1816E9D94374A4953BA2A19783DA59B6'
+  config.boost_cookie = 'CBADB424BB3B3C76369F12DD0D3B5FDC'
 end

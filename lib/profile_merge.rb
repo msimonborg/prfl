@@ -5,7 +5,7 @@ require_relative 'profile_merge/boost_data'
 require_relative 'profile_merge/version'
 
 module ProfileMerge
-  class Error < StandardError; end
+  class BoostError < StandardError; end
 
   class Config
     attr_accessor :artisan_path

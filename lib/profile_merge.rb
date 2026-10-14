@@ -11,6 +11,7 @@ module ProfileMerge
     attr_accessor :artisan_path
     attr_accessor :boost_path
     attr_accessor :target_path
+    attr_accessor :boost_cookie
   end
 
   @@config = false

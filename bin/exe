@@ -3,6 +3,7 @@
 
 require 'bundler/setup'
 require 'profile_merge'
+require 'json'
 
 require_relative '../config.rb'
 
@@ -13,6 +14,93 @@ ARTISAN_DIR = Dir.new(CONFIG.artisan_path)
 BOOST_DIR = Dir.new(CONFIG.boost_path)
 TARGET_DIR = Dir.new(CONFIG.target_path)
 
+arg = ARGV[0]
+
+# We attempt to fetch profile data for a specific batch # when passed as an arg
+# e.g. `bin/exe 7825`
+if arg and arg.match?(/\d{4,}/)
+  boost_data_filename = "#{arg}.json"
+  path = "#{CONFIG.boost_path}/#{boost_data_filename}"
+
+  if BOOST_DIR.children.include?(boost_data_filename)
+    puts "Boost profile data for batch ##{arg} already exists at #{path}"
+  else
+    get_profile_metadata =
+      lambda do |roast_count=20|
+        `
+        curl 'https://boost.stronghold.coffee/rstry/profile/status/list.sq?rc=w0&prodCd=10006&page=1&pageSetCnt=#{roast_count}&minRstTime=0&maxRstTime=1800&prflName=&grnBeanName=' \
+        -X 'GET' \
+        -H 'Accept: application/json, text/javascript, */*; q=0.01' \
+        -H 'Sec-Fetch-Site: same-origin' \
+        -H 'Accept-Language: en-US,en;q=0.9' \
+        -H 'Accept-Encoding: gzip, deflate, br, zstd' \
+        -H 'Sec-Fetch-Mode: cors' \
+        -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3 Safari/605.1.15' \
+        -H 'Referer: https://boost.stronghold.coffee/rstry/prfl.sq?rc=w0&lang=en' \
+        -H 'Connection: keep-alive' \
+        -H 'Cookie: lang=en; boost=#{CONFIG.boost_cookie}' \
+        -H 'Sec-Fetch-Dest: empty' \
+        -H 'X-Requested-With: XMLHttpRequest' \
+        -H 'Priority: u=3, i'
+        `
+      end
+
+    res = get_profile_metadata.call
+    profile_metadata = JSON.parse(res)
+    total_roast_count = profile_metadata['totalRstCnt']
+
+    profile =
+      profile_metadata['profiles'].find do |elem|
+        elem['prflName'].match?(arg)
+      end
+
+    profile =
+      if profile
+        profile
+      else
+        puts <<~EOT
+          Profile data not found in last 20 roasts
+          Checking all #{total_roast_count} roasts
+        EOT
+
+        res = get_profile_metadata.call(total_roast_count)
+        profile_metadata = JSON.parse(res)
+        
+        profile_metadata['profiles'].find do |elem|
+          elem['prflName'].match?(arg)
+        end
+      end
+
+
+    if profile
+      puts "Found profile data for batch #{arg}"
+
+      profile_data = `
+        curl 'https://boost.stronghold.coffee/rstry/profile/detail/get.sq?prodCd=10006&prflMCd=20261014051737838289&rc=w0' \
+        -X 'GET' \
+        -H 'Accept: application/json, text/javascript, */*; q=0.01' \
+        -H 'Sec-Fetch-Site: same-origin' \
+        -H 'Accept-Language: en-US,en;q=0.9' \
+        -H 'Accept-Encoding: gzip, deflate, br, zstd' \
+        -H 'Sec-Fetch-Mode: cors' \
+        -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3 Safari/605.1.15' \
+        -H 'Referer: https://boost.stronghold.coffee/rstry/profile/detail.sq?rc=w0&pCd=10006&cd=20261014051737838289&lang=en' \
+        -H 'Connection: keep-alive' \
+        -H 'Cookie: lang=en; boost=#{CONFIG.boost_cookie}' \
+        -H 'Sec-Fetch-Dest: empty' \
+        -H 'X-Requested-With: XMLHttpRequest' \
+        -H 'Priority: u=3, i'
+      `
+
+      path = "#{CONFIG.boost_path}/#{arg}.json"
+      File.write(path, profile_data)
+      puts "Downloaded boost profile data as #{path}"
+    else
+      puts "Profile data for batch #{arg} not found on Boost"
+    end
+  end
+end
+
 history = 
   if File.exist?(HISTORY)
     File.read(HISTORY)
@@ -22,7 +110,8 @@ history =
 
 queue =
   ARTISAN_DIR.children.collect do |artisan_file|
-    match = artisan_file.match(/#\d{4}/)
+    # valid batch number patterns: "#1234", "#12345", "#123456" etc.
+    match = artisan_file.match(/#\d{4,}/)
 
     if match
       batch_number = match.to_s.sub('#', '')

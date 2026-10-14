@@ -50,12 +50,19 @@ module ProfileMerge
 
       extratimex = []
 
+      # extratimex = [1.0, 2.0, 3.0, ...]
       self.data["timex"].each_index do |i|
         extratimex << (i + 1).to_f
       end
 
+      extratimex = [
+        extratimex,
+        extratimex,
+        extratimex,
+        extratimex
+      ]
 
-      self.data["extratimex"].insert(1, extratimex, extratimex, extratimex, extratimex)
+      self.data["extratimex"].insert(1, *extratimex)
       self.add_boost_temps(boost_data)
 
       self.data["extramathexpression1"].insert(1, *EXTRA_MATH_EXPRESSIONS)
@@ -98,18 +105,15 @@ module ProfileMerge
     private
 
     def calibrate_bt
-      new_bt = []
-      
-      self.data["temp2"].each do |temp|
-        new_bt << (temp + CALIBRATION_VALUE)
+      self.data["temp2"].map! do |temp|
+        temp + CALIBRATION_VALUE
       end
-
-      self.data["temp2"] = new_bt
     end
 
     def add_boost_temps(boost_data)
       pre_pad = []
       post_pad = []
+      
       boost_length = boost_data.timex.length
       artisan_length = self.data["timex"].length
 

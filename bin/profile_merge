@@ -3,6 +3,6 @@
 # add this script to your path
 
 current_dir=$(pwd)
-cd ~/Dev/artisan/profile_merge/
+cd ~/Dropbox/carrier/artisan/profile_merge/
 bin/exe
 cd $current_dir

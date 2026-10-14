@@ -6,7 +6,7 @@
 /pkg/
 /spec/reports/
 /tmp/
-/history
+/history.txt
 /Gemfile.lock
 
 # rspec failure tracking

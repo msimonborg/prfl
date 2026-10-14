@@ -31,9 +31,9 @@ queue =
       if boost_file && !history.match(batch_number)
         {
           batch_number: batch_number,
-          artisan_file: CONFIG.artisan_path + artisan_file,
-          boost_file: CONFIG.boost_path + boost_file,
-          target_path: CONFIG.target_path + artisan_file
+          artisan_file: "#{CONFIG.artisan_path}/#{artisan_file}",
+          boost_file: "#{CONFIG.boost_path}/#{boost_file}",
+          target_path: "#{CONFIG.target_path}/#{artisan_file}"
         }
       end
     end

@@ -8,5 +8,7 @@ ProfileMerge.config do |config|
   config.artisan_path = lookup_path.call('roasts')
   config.boost_path = lookup_path.call('boost data/raw')
   config.target_path = lookup_path.call('roasts/merged')
-  config.boost_cookie = 'CBADB424BB3B3C76369F12DD0D3B5FDC'
+  config.boost_cookie = '06E0AD125B9C921B17A0A5ED8C204DB0'
+  config.boost_email = 'matt@carrierroasting.com'
+  config.boost_password = 'jepkyj-hampe4-qasnUc'
 end

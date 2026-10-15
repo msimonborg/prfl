@@ -2,16 +2,20 @@
 
 require_relative 'profile_merge/artisan_data'
 require_relative 'profile_merge/boost_data'
+require_relative 'profile_merge/boost_driver'
 require_relative 'profile_merge/version'
 
 module ProfileMerge
-  class BoostError < StandardError; end
+  class Error < StandardError; end
 
   class Config
     attr_accessor :artisan_path
     attr_accessor :boost_path
     attr_accessor :target_path
     attr_accessor :boost_cookie
+    attr_accessor :boost_email
+    attr_accessor :boost_password
+    attr_accessor :browser
   end
 
   @@config = false

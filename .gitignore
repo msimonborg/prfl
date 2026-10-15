@@ -8,6 +8,9 @@
 /tmp/
 /history.txt
 /Gemfile.lock
+/config.rb
+/profile_list.json
+/cookie
 
 # rspec failure tracking
 .rspec_status

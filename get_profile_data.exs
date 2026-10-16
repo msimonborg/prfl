@@ -34,7 +34,10 @@ fun = fn profile ->
 
   {response, 0} = System.shell(request, use_stdio: true)
 
-  File.write!("#{data_dir}/#{profile["filename"]}", response)
+  filename = profile["filename"]
+  File.write!("#{data_dir}/#{filename}", response)
+  # Return the filename
+  filename
 end
 
 children = [
@@ -53,7 +56,9 @@ stream =
 
 total_count = Enum.count(profile_list)
 
-Enum.with_index(stream, fn {:ok, :ok}, index ->
+Enum.with_index(stream, fn {:ok, filename}, index ->
   num = index + 1
-  Logger.info("Saved #{num} of #{total_count} profiles, #{total_count - num} remaining")
+
+  Logger.info("Saved #{num} of #{total_count} profiles as #{filename}")
+  Logger.info("#{total_count - num} remaining")
 end)

@@ -16,6 +16,7 @@ TARGET_DIR = Dir.new(CONFIG.target_path)
 
 arg = ARGV[0]
 
+# TODO: Accept a list of batch numbers and process them all with minimal requests
 # We attempt to fetch profile data for a specific batch # when passed as an arg
 # e.g. `bin/exe 7825`
 if arg&.match?(/\d{4,}/)
@@ -59,23 +60,34 @@ if arg&.match?(/\d{4,}/)
       puts "Found profile data for batch ##{arg}"
 
       id = profile["prflMCd"]
-      profile_data = driver.get_profile_data(id)
+
+      existing_filename = "#{id}.json"
+      existing_path = "#{CONFIG.boost_path}/#{existing_filename}"
 
       filename = "#{id}_#{arg}.json"
       path = "#{CONFIG.boost_path}/#{filename}"
 
-      # TODO: Remove duplicate profile data if it exists. This may happen
-      # if the batch number was not originally included in the Boost profile
-      # name and was added later
-      File.write(path, profile_data)
-      puts "Saved boost profile data as #{filename}"
+      if File.exist?(existing_path)
+        puts "Found data in existing file #{existing_filename}"
+        puts "Renaming existing file to #{filename}"
+
+        File.rename(existing_path, path)
+      else
+        profile_data = driver.get_profile_data(id)
+        File.write(path, profile_data)
+
+        puts "Saved boost profile data as #{filename}"
+      end
+
     else
       puts "Profile data for batch ##{arg} not found on Boost"
     end
 
     driver.quit
   end
+  # if matching_file
 end
+# if arg&.match?(/\d{4,}/)
 
 if arg && arg == "all"
   driver = ProfileMerge::BoostDriver.new
@@ -90,15 +102,22 @@ if arg && arg == "all"
 
   puts "#{count} total roast(s) on Boost since last update"
 
+  # Exit fast if the new roast count is 0
   if count.positive?
-    ### The version below only works if the response is ordered by recency
-    # response = driver.get_profile_metadata(count: count) if count > 20
-    # profile_metadata = JSON.parse(response).take(count)
-    response = driver.get_profile_metadata(count: count)
-    new_profiles = JSON.parse(response)["profiles"]
+    # Only make a second request if the first response doesn't contain the
+    # full count
+    response = driver.get_profile_metadata(count: count) if count > 20
+
+    # The response should be sorted by most recent datetime, but we will
+    # do it anyway just in case, and take only the first `count` profiles
+    new_profiles =
+      JSON.parse(response)["profiles"].sort do |a, b|
+        b["rstDt"] <=> a["rstDt"]
+      end.take(count)
 
     puts "Found metadata for #{new_profiles.length} new roast(s)"
 
+    # Exlude profiles that match Onyx Tonics' naming conventions
     profile_list =
       new_profiles.filter do |profile|
         name = profile["prflName"]
@@ -128,9 +147,11 @@ if arg && arg == "all"
     IO.popen("elixir get_profile_data.exs").each { |line| puts line }
     File.write("counter", total_roast_count)
   end
+  # if count.positive?
 
   driver.quit
 end
+# if arg && arg == "all"
 
 history =
   if File.exist?(HISTORY)

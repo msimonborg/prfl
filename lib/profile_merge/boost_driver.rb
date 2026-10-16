@@ -12,31 +12,18 @@ module ProfileMerge
 
     def initialize
       @config = ProfileMerge.config || ProfileMerge::Config.new
-      @cookie = @config.boost_cookie
     end
 
     def quit
-      driver.quit if driver
+      driver&.quit
     end
 
     def new_session
       puts "Starting a new #{BROWSER.to_s.capitalize} session"
-
-      options = Selenium::WebDriver::Options.send(BROWSER)
-      options.page_load_strategy = :eager
-      options.add_argument("--headless=new")
-      @driver = Selenium::WebDriver.for(BROWSER, options: options)
+      create_driver
 
       puts "Attempting to login to Boost"
-
-      begin
-        @driver.get("https://boost.stronghold.coffee/acct/login.sq?lang=en")
-        driver.find_element(id: "userId").send_keys(@config.boost_email)
-        driver.find_element(id: "userPwd").send_keys(@config.boost_password)
-        driver.find_element(tag_name: "button").click
-      rescue Selenium::WebDriver::Error::NoSuchElementError
-        raise Error, "Login page did not load correctly, element not found"
-      end
+      log_in
 
       puts "Login successful, retrieving session cookie"
       @cookie = driver.manage.cookie_named("boost")[:value]
@@ -47,10 +34,31 @@ module ProfileMerge
       self
     end
 
-    def get_profile_metadata(count: count = 20)
-      response =
-        `
-        curl -s 'https://boost.stronghold.coffee/rstry/profile/status/list.sq?rc=w0&prodCd=10006&page=1&pageSetCnt=#{count}&minRstTime=0&maxRstTime=1800&prflName=&grnBeanName=' \
+    def get_profile_metadata(options = {})
+      count = options[:count] || 20
+      response = `#{metadata_request(count)}`
+      fail_on_empty(response)
+    end
+
+    def get_profile_data(profile_id)
+      response = `#{profile_request(profile_id)}`
+      fail_on_empty(response)
+    end
+
+    private
+
+    def fail_on_empty(response)
+      if response.empty?
+        raise CookieError,
+              "No response from Boost server. Make sure the cookie is valid."
+      else
+        response
+      end
+    end
+
+    def metadata_request(count)
+      <<~CMD
+        curl 'https://boost.stronghold.coffee/rstry/profile/status/list.sq?rc=w0&prodCd=10006&page=1&pageSetCnt=#{count}&minRstTime=0&maxRstTime=1800&prflName=&grnBeanName=' \
         -X 'GET' \
         -H 'Accept: application/json, text/javascript, */*; q=0.01' \
         -H 'Sec-Fetch-Site: same-origin' \
@@ -64,19 +72,11 @@ module ProfileMerge
         -H 'Sec-Fetch-Dest: empty' \
         -H 'X-Requested-With: XMLHttpRequest' \
         -H 'Priority: u=3, i'
-        `
-
-      if response.empty?
-        raise CookieError,
-              "No response from Boost server. Make sure the cookie is valid."
-      else
-        response
-      end
+      CMD
     end
 
-    def get_profile_data(profile_id)
-      response =
-        `
+    def profile_request(profile_id)
+      <<~CMD
         curl -s 'https://boost.stronghold.coffee/rstry/profile/detail/get.sq?prodCd=10006&prflMCd=#{profile_id}&rc=w0' \
         -X 'GET' \
         -H 'Accept: application/json, text/javascript, */*; q=0.01' \
@@ -91,14 +91,23 @@ module ProfileMerge
         -H 'Sec-Fetch-Dest: empty' \
         -H 'X-Requested-With: XMLHttpRequest' \
         -H 'Priority: u=3, i'
-        `
+      CMD
+    end
 
-      if response.empty?
-        raise CookieError,
-              "No response from Boost server. Make sure the cookie is valid."
-      else
-        response
-      end
+    def create_driver
+      options = Selenium::WebDriver::Options.send(BROWSER)
+      options.page_load_strategy = :eager
+      options.add_argument("--headless=new")
+      @driver = Selenium::WebDriver.for(BROWSER, options: options)
+    end
+
+    def log_in
+      driver.get("https://boost.stronghold.coffee/acct/login.sq?lang=en")
+      driver.find_element(id: "userId").send_keys(@config.boost_email)
+      driver.find_element(id: "userPwd").send_keys(@config.boost_password)
+      driver.find_element(tag_name: "button").click
+    rescue Selenium::WebDriver::Error::NoSuchElementError
+      raise Error, "Login page did not load correctly, element not found"
     end
   end
 end

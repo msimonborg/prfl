@@ -11,6 +11,7 @@
 /config.rb
 /profile_list.json
 /cookie
+/rename.exs
 
 # rspec failure tracking
 .rspec_status

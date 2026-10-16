@@ -18,23 +18,21 @@ arg = ARGV[0]
 
 # We attempt to fetch profile data for a specific batch # when passed as an arg
 # e.g. `bin/exe 7825`
-if arg && arg.match?(/\d{4,}/)
+if arg&.match?(/\d{4,}/)
   boost_data_filename = "#{arg}.json"
   path = "#{CONFIG.boost_path}/#{boost_data_filename}"
 
-  if BOOST_DIR.children.include?(boost_data_filename)
-    puts "Boost profile data for batch ##{arg} already exists at #{path}"
+  matching_file =
+    BOOST_DIR.children.find do |filename|
+      filename.match?("_#{arg}.json")
+    end
+
+  if matching_file
+    puts "Boost profile data for batch ##{arg} already exists at #{matching_file}"
   else
     driver = ProfileMerge::BoostDriver.new
-
-    response =
-      begin
-        driver.get_profile_metadata
-      rescue ProfileMerge::BoostDriver::CookieError
-        puts "No response from boost server, refreshing cookie"
-        driver.new_session
-        driver.get_profile_metadata
-      end
+    driver.new_session
+    response = driver.get_profile_metadata
 
     profile_metadata = JSON.parse(response)
     total_roast_count = profile_metadata["totalRstCnt"]
@@ -45,25 +43,31 @@ if arg && arg.match?(/\d{4,}/)
         elem["prflName"].match?(/^#{arg}\b/)
       end
 
-    profile ||= puts <<~LOG
-      Profile data not found in last 20 roasts
-      Checking all #{total_roast_count} roasts
-    LOG
+    unless profile
+      puts <<~LOG
+        Profile data not found in last 20 roasts
+        Checking all #{total_roast_count} roasts
+      LOG
 
-    res = driver.get_profile_metadata(count: total_roast_count)
-    profile_metadata = JSON.parse(res)
+      res = driver.get_profile_metadata(count: total_roast_count)
+      profile_metadata = JSON.parse(res)
 
-    profile_metadata["profiles"].find do |elem|
-      elem["prflName"].match?(/^#{arg}\b/)
+      profile =
+        profile_metadata["profiles"].find do |elem|
+          elem["prflName"].match?(/^#{arg}\b/)
+        end
     end
 
     if profile
       puts "Found profile data for batch ##{arg}"
-      profile_data = driver.get_profile_data(profile["prflMCd"])
 
-      path = "#{CONFIG.boost_path}/#{arg}.json"
+      id = profile["prflMCd"]
+      profile_data = driver.get_profile_data(id)
+
+      filename = "#{id}_#{arg}.json"
+      path = "#{CONFIG.boost_path}/#{filename}"
       File.write(path, profile_data)
-      puts "Downloaded boost profile data as #{path}"
+      puts "Saved boost profile data as #{filename}"
     else
       puts "Profile data for batch ##{arg} not found on Boost"
     end
@@ -74,21 +78,22 @@ end
 
 if arg && arg == "all"
   driver = ProfileMerge::BoostDriver.new
+  driver.new_session
 
-  response =
-    begin
-      driver.get_profile_metadata
-    rescue ProfileMerge::BoostDriver::CookieError
-      puts "No response from boost server, refreshing cookie"
-      driver.new_session
-      driver.get_profile_metadata
-    end
-
+  response = driver.get_profile_metadata
   profile_metadata = JSON.parse(response)
+
+  counter = File.read("counter").to_i
   total_roast_count = profile_metadata["totalRstCnt"]
+  count = total_roast_count - counter
 
-  response = driver.get_profile_metadata(count: total_roast_count)
+  ### The version below only works if the response is ordered by recency
+  # response = driver.get_profile_metadata(count: count) if count > 20
+  # profile_metadata = JSON.parse(response).take(count)
+
+  response = driver.get_profile_metadata(count: count)
   profile_metadata = JSON.parse(response)
+  puts "Found data for #{count} new roast(s)"
 
   profile_list =
     profile_metadata["profiles"].filter do |profile|
@@ -99,11 +104,11 @@ if arg && arg == "all"
   profile_list.map! do |profile|
     id = profile["prflMCd"]
     name = profile["prflName"]
-    match = name.match(/^\d{4,}\b/)
+    batch_number = name.match(/^\d{4,}\b/)
 
     filename =
-      if match
-        "#{match}_#{id}.json"
+      if batch_number
+        "#{id}_#{batch_number}.json"
       else
         "#{id}.json"
       end
@@ -115,6 +120,7 @@ if arg && arg == "all"
   File.write("cookie", driver.cookie)
 
   IO.popen("elixir get_profile_data.exs").each { |line| puts line }
+  File.write("counter", total_roast_count)
 
   driver.quit
 end
@@ -134,7 +140,11 @@ queue =
     next unless match
 
     batch_number = match.to_s.sub("#", "")
-    boost_file = BOOST_DIR.children.find { |child| child.match?(batch_number) }
+
+    boost_file =
+      BOOST_DIR.children.find do |child|
+        child.match?("#{batch_number}.json")
+      end
 
     next unless boost_file && !history.match(batch_number)
 
@@ -146,8 +156,8 @@ queue =
     }
   end
 
-# Reject nil values
-queue.reject! { |elem| !elem }
+# Select only truthy values
+queue.select! { |elem| elem }
 
 puts "Found #{queue.length} unmerged file pair(s)"
 
@@ -156,9 +166,11 @@ queue.each do |profile|
   artisan_file = profile[:artisan_file]
   boost_file = profile[:boost_file]
   target_path = profile[:target_path]
-  calibrate = batch_number.to_i <= 7775
+  options = {
+    calibrate: batch_number.to_i <= 7775
+  }
 
-  ProfileMerge.execute(artisan_file, boost_file, target_path, calibrate)
+  ProfileMerge.execute(artisan_file, boost_file, target_path, options)
 
   File.open(HISTORY, "a") do |file|
     file.write("#{batch_number} - #{target_path}\n")

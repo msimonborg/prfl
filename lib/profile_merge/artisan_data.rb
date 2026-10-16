@@ -1,20 +1,20 @@
 # frozen_string_literal: true
 
-require 'json'
+require "json"
 
 module ProfileMerge
   class ArtisanData
     CALIBRATION_VALUE = -10.0
     EXTRA_DEVICES = [25, 25, 25, 25]
-    EXTRA_NAME_1 = ["IT", "IR", "BT2", "DT2"]
+    EXTRA_NAME_1 = %w[IT IR BT2 DT2]
     EXTRA_NAME_2 = ["Delta IT", "Delta IR", "Delta BT2", "Delta DT2"]
     EXTRA_MATH_EXPRESSIONS = ["", "", "", ""]
     EXTRA_DEVICE_COLORS = ["#000000", "#000000", "#000000", "#000000"]
     EXTRA_MARKER_SIZES = [6.0, 6.0, 6.0, 6.0]
-    EXTRA_MARKERS = ["null", "null", "null", "null"]
+    EXTRA_MARKERS = %w[null null null null]
     EXTRA_LINE_WIDTHS = [1.0, 1.0, 1.0, 1.0]
     EXTRA_LINE_STYLES = ["-", "-", "-", "-"]
-    EXTRA_DRAW_STYLES = ["default", "default", "default", "default"]
+    EXTRA_DRAW_STYLES = %w[default default default default]
 
     EXTRA_CURVE_VISIBILITY = [
       false,
@@ -29,29 +29,27 @@ module ProfileMerge
       false
     ]
 
-    attr_accessor :source
-    attr_accessor :data
-    attr_accessor :drop_index
+    attr_accessor :source, :data, :drop_index
 
-    def initialize(filename, calibrate: calibrate)
+    def initialize(filename, options)
       self.source = File.read(filename)
-      self.data = self.parse_source
+      self.data = parse_source
 
-      time_index = self.data["timeindex"]
+      time_index = data["timeindex"]
       self.drop_index = time_index[6]
 
-      self.calibrate_bt if calibrate
+      calibrate_bt if options[:calibrate] == true
     end
 
     def merge_boost_data(boost_data)
-      self.data["extradevices"].insert(1, *EXTRA_DEVICES)
-      self.data["extraname1"].insert(1, *EXTRA_NAME_1)
-      self.data["extraname2"].insert(1, *EXTRA_NAME_2)
+      data["extradevices"].insert(1, *EXTRA_DEVICES)
+      data["extraname1"].insert(1, *EXTRA_NAME_1)
+      data["extraname2"].insert(1, *EXTRA_NAME_2)
 
       extratimex = []
 
       # extratimex = [1.0, 2.0, 3.0, ...]
-      self.data["timex"].each_index do |i|
+      data["timex"].each_index do |i|
         extratimex << (i + 1).to_f
       end
 
@@ -62,40 +60,39 @@ module ProfileMerge
         extratimex
       ]
 
-      self.data["extratimex"].insert(1, *extratimex)
-      self.add_boost_temps(boost_data)
+      data["extratimex"].insert(1, *extratimex)
+      add_boost_temps(boost_data)
 
-      self.data["extramathexpression1"].insert(1, *EXTRA_MATH_EXPRESSIONS)
-      self.data["extramathexpression2"].insert(1, *EXTRA_MATH_EXPRESSIONS)
+      data["extramathexpression1"].insert(1, *EXTRA_MATH_EXPRESSIONS)
+      data["extramathexpression2"].insert(1, *EXTRA_MATH_EXPRESSIONS)
 
-      self.data["extradevicecolor1"].insert(1, *EXTRA_DEVICE_COLORS)
-      self.data["extradevicecolor2"].insert(1, *EXTRA_DEVICE_COLORS)
+      data["extradevicecolor1"].insert(1, *EXTRA_DEVICE_COLORS)
+      data["extradevicecolor2"].insert(1, *EXTRA_DEVICE_COLORS)
 
-      self.data["extramarkersizes1"].insert(1, *EXTRA_MARKER_SIZES)
-      self.data["extramarkersizes2"].insert(1, *EXTRA_MARKER_SIZES)
+      data["extramarkersizes1"].insert(1, *EXTRA_MARKER_SIZES)
+      data["extramarkersizes2"].insert(1, *EXTRA_MARKER_SIZES)
 
-      self.data["extramarkers1"].insert(1, *EXTRA_MARKERS)
-      self.data["extramarkers2"].insert(1, *EXTRA_MARKERS)
+      data["extramarkers1"].insert(1, *EXTRA_MARKERS)
+      data["extramarkers2"].insert(1, *EXTRA_MARKERS)
 
-      self.data["extralinewidths1"].insert(1, *EXTRA_LINE_WIDTHS)
-      self.data["extralinewidths2"].insert(1, *EXTRA_LINE_WIDTHS)
+      data["extralinewidths1"].insert(1, *EXTRA_LINE_WIDTHS)
+      data["extralinewidths2"].insert(1, *EXTRA_LINE_WIDTHS)
 
-      self.data["extralinestyles1"].insert(1, *EXTRA_LINE_STYLES)
-      self.data["extralinestyles2"].insert(1, *EXTRA_LINE_STYLES)
+      data["extralinestyles1"].insert(1, *EXTRA_LINE_STYLES)
+      data["extralinestyles2"].insert(1, *EXTRA_LINE_STYLES)
 
-      self.data["extradrawstyles1"].insert(1, *EXTRA_DRAW_STYLES)
-      self.data["extradrawstyles2"].insert(1, *EXTRA_DRAW_STYLES)
+      data["extradrawstyles1"].insert(1, *EXTRA_DRAW_STYLES)
+      data["extradrawstyles2"].insert(1, *EXTRA_DRAW_STYLES)
 
-      self.data["extraCurveVisibility1"] = (1..10).map { |_| true }
-      self.data["extraCurveVisibility2"] = EXTRA_CURVE_VISIBILITY
-      self.data["extraDelta2"] = EXTRA_CURVE_VISIBILITY
+      data["extraCurveVisibility1"] = (1..10).map { |_| true }
+      data["extraCurveVisibility2"] = EXTRA_CURVE_VISIBILITY
+      data["extraDelta2"] = EXTRA_CURVE_VISIBILITY
 
       self
     end
 
-
     def convert_to_raw
-      string = JSON.generate(self.data)
+      string = JSON.generate(data)
       string.gsub!("\"", "'")
       string.gsub!("false", "False")
       string.gsub!("true", "True")
@@ -105,7 +102,7 @@ module ProfileMerge
     private
 
     def calibrate_bt
-      self.data["temp2"].map! do |temp|
+      data["temp2"].map! do |temp|
         temp + CALIBRATION_VALUE
       end
     end
@@ -113,15 +110,15 @@ module ProfileMerge
     def add_boost_temps(boost_data)
       pre_pad = []
       post_pad = []
-      
-      boost_length = boost_data.timex.length
-      artisan_length = self.data["timex"].length
 
-      (1..(self.drop_index - boost_length)).each do |_|
+      boost_length = boost_data.timex.length
+      artisan_length = data["timex"].length
+
+      (1..(drop_index - boost_length)).each do |_|
         pre_pad << -1.0
       end
 
-      ((self.drop_index + 1)..artisan_length).each do |_|
+      ((drop_index + 1)..artisan_length).each do |_|
         post_pad << -1.0
       end
 
@@ -147,12 +144,12 @@ module ProfileMerge
         pre_pad + ror + post_pad
       end
 
-      self.data["extratemp1"].insert(1, *temps)
-      self.data["extratemp2"].insert(1, *rors)
+      data["extratemp1"].insert(1, *temps)
+      data["extratemp2"].insert(1, *rors)
     end
 
     def parse_source
-      string = self.source
+      string = source
       string.gsub!("'", "\"")
       string.gsub!("False", "false")
       string.gsub!("True", "true")

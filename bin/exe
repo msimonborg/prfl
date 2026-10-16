@@ -19,9 +19,6 @@ arg = ARGV[0]
 # We attempt to fetch profile data for a specific batch # when passed as an arg
 # e.g. `bin/exe 7825`
 if arg&.match?(/\d{4,}/)
-  boost_data_filename = "#{arg}.json"
-  path = "#{CONFIG.boost_path}/#{boost_data_filename}"
-
   matching_file =
     BOOST_DIR.children.find do |filename|
       filename.match?("_#{arg}.json")

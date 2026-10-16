@@ -58,7 +58,7 @@ module ProfileMerge
 
     def metadata_request(count)
       <<~CMD
-        curl 'https://boost.stronghold.coffee/rstry/profile/status/list.sq?rc=w0&prodCd=10006&page=1&pageSetCnt=#{count}&minRstTime=0&maxRstTime=1800&prflName=&grnBeanName=' \
+        curl -s 'https://boost.stronghold.coffee/rstry/profile/status/list.sq?rc=w0&prodCd=10006&page=1&pageSetCnt=#{count}&minRstTime=0&maxRstTime=1800&prflName=&grnBeanName=' \
         -X 'GET' \
         -H 'Accept: application/json, text/javascript, */*; q=0.01' \
         -H 'Sec-Fetch-Site: same-origin' \

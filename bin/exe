@@ -140,7 +140,7 @@ queue =
 
     boost_file =
       BOOST_DIR.children.find do |child|
-        child.match?("#{batch_number}.json")
+        child.match?("_#{batch_number}.json")
       end
 
     next unless boost_file && !history.match(batch_number)
@@ -167,7 +167,10 @@ queue.each do |profile|
     calibrate: batch_number.to_i <= 7775
   }
 
-  ProfileMerge.execute(artisan_file, boost_file, target_path, options)
+  artisan_data = ProfileMerge::ArtisanData.new(artisan_file, options)
+  boost_data = ProfileMerge::BoostData.new(boost_file)
+  artisan_data.merge_boost!(boost_data)
+  File.write(target_path, artisan_data.convert_to_raw)
 
   File.open(HISTORY, "a") do |file|
     file.write("#{batch_number} - #{target_path}\n")

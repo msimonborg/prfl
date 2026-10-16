@@ -25,11 +25,4 @@ module ProfileMerge
     @@config ||= Config.new
     block.call(@@config)
   end
-
-  def self.execute(artisan_filename, boost_filename, target_filename, options)
-    artisan_data = ArtisanData.new(artisan_filename, options)
-    boost_data = BoostData.new(boost_filename)
-    artisan_data.merge_boost_data(boost_data)
-    File.write(target_filename, artisan_data.convert_to_raw)
-  end
 end

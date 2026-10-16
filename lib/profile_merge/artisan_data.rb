@@ -41,7 +41,7 @@ module ProfileMerge
       calibrate_bt if options[:calibrate] == true
     end
 
-    def merge_boost_data(boost_data)
+    def merge_boost!(boost_data)
       data["extradevices"].insert(1, *EXTRA_DEVICES)
       data["extraname1"].insert(1, *EXTRA_NAME_1)
       data["extraname2"].insert(1, *EXTRA_NAME_2)

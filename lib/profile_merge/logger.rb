@@ -11,7 +11,6 @@ module ProfileMerge
     end
 
     def self.time_stamp
-      t = Time.new
       "[ #{Time.now.strftime("%H:%M:%S.%L")} ]"
     end
   end

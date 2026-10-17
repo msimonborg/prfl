@@ -3,6 +3,7 @@
 require_relative "profile_merge/artisan_data"
 require_relative "profile_merge/boost_data"
 require_relative "profile_merge/boost_driver"
+require_relative "profile_merge/logger"
 require_relative "profile_merge/version"
 
 module ProfileMerge

@@ -4,5 +4,5 @@
 
 current_dir=$(pwd)
 cd ~/Dropbox/carrier/artisan/profile_merge/
-bin/exe $1
+bin/exe $@
 cd $current_dir

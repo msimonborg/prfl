@@ -14,82 +14,139 @@ ARTISAN_DIR = Dir.new(CONFIG.artisan_path)
 BOOST_DIR = Dir.new(CONFIG.boost_path)
 TARGET_DIR = Dir.new(CONFIG.target_path)
 
-arg = ARGV[0]
+LOGGER = ProfileMerge::Logger
 
-# TODO: Accept a list of batch numbers and process them all with minimal requests
-# We attempt to fetch profile data for a specific batch # when passed as an arg
-# e.g. `bin/exe 7825`
-if arg&.match?(/\d{4,}/)
-  matching_file =
-    BOOST_DIR.children.find do |filename|
-      filename.match?("_#{arg}.json")
+# Helpers
+def extract_batch_number(profile)
+  profile["prflName"].match(/^\d{4,}\b/).to_s
+end
+
+def get_profile_data(profile_list, cookie)
+  File.write("profile_list.json", JSON.generate(profile_list))
+  File.write("cookie", cookie)
+
+  IO.popen("elixir get_profile_data.exs").each { |line| puts line }
+end
+
+# We attempt to fetch profile data for a list of batch numbers as the args
+# e.g. `$ profile_merge 7825 7828 7834`
+if !ARGV.empty? && ARGV.all? { |arg| arg.match?(/\d{4,}/) }
+  batch_numbers =
+    ARGV.filter do |arg|
+      matching_file =
+        BOOST_DIR.children.find do |filename|
+          filename.match?("_#{arg}.json")
+        end
+      if matching_file
+        LOGGER.log(
+          "Boost profile data for batch ##{arg} already exists at #{matching_file}"
+        )
+      else
+        arg
+      end
     end
 
-  if matching_file
-    puts "Boost profile data for batch ##{arg} already exists at #{matching_file}"
-  else
+  if batch_numbers.length.positive?
     driver = ProfileMerge::BoostDriver.new
     driver.new_session
-    response = driver.get_profile_metadata
 
+    LOGGER.log(
+      "Checking last 20 roasts for batch numbers #{batch_numbers.join(", ")}"
+    )
+
+    response = driver.get_profile_metadata
     profile_metadata = JSON.parse(response)
     total_roast_count = profile_metadata["totalRstCnt"]
 
-    profile =
-      profile_metadata["profiles"].find do |elem|
+    profiles =
+      profile_metadata["profiles"].filter do |profile|
         # only match if the name starts with the batch num followed by white space
-        elem["prflName"].match?(/^#{arg}\b/)
+        batch_number = extract_batch_number(profile)
+        batch_numbers.include?(batch_number)
       end
 
-    unless profile
-      puts <<~LOG
-        Profile data not found in last 20 roasts
-        Checking all #{total_roast_count} roasts
-      LOG
+    if profiles.length < batch_numbers.length
+      LOGGER.log("Not all data was found in last 20 roasts")
+      LOGGER.log("Checking all #{total_roast_count} roasts")
 
-      res = driver.get_profile_metadata(count: total_roast_count)
-      profile_metadata = JSON.parse(res)
+      response = driver.get_profile_metadata(count: total_roast_count)
+      profile_metadata = JSON.parse(response)
 
-      profile =
-        profile_metadata["profiles"].find do |elem|
-          elem["prflName"].match?(/^#{arg}\b/)
+      extra_profiles =
+        profile_metadata["profiles"].filter do |profile|
+          # only match if the name starts with the batch num followed by white space
+          batch_number = extract_batch_number(profile)
+          batch_numbers.include?(batch_number) && profiles.none?(profile)
         end
+
+      profiles.push(*extra_profiles)
     end
 
-    if profile
-      puts "Found profile data for batch ##{arg}"
+    profiles =
+      profiles.reduce([]) do |arr, profile|
+        profile["batch_number"] = extract_batch_number(profile)
+        profile["filename"]     = "#{profile["prflMCd"]}_#{profile["batch_number"]}.json"
+        path                    = "#{CONFIG.boost_path}/#{profile["filename"]}"
 
-      id = profile["prflMCd"]
+        # The profile may already be in the file system without the batch
+        # number as part of the name. We will store what the values of that
+        # file would be if it exists
+        existing_filename       = "#{profile["prflMCd"]}.json"
+        existing_path           = "#{CONFIG.boost_path}/#{existing_filename}"
 
-      existing_filename = "#{id}.json"
-      existing_path = "#{CONFIG.boost_path}/#{existing_filename}"
+        # While we iterate through the map we remove the batch number from the original
+        # args. The remaining batch numbers (args) could not be found on boost
+        # or in the file system
+        batch_numbers.reject! { |num| num == profile["batch_number"] }
 
-      filename = "#{id}_#{arg}.json"
-      path = "#{CONFIG.boost_path}/#{filename}"
+        if File.exist?(existing_path)
+          LOGGER.log(
+            "Matched #{profile["batch_number"]} to existing file #{existing_filename}"
+          )
 
-      if File.exist?(existing_path)
-        puts "Found data in existing file #{existing_filename}"
-        puts "Renaming existing file to #{filename}"
+          LOGGER.log(
+            "Renaming existing file to #{profile["filename"]}"
+          )
 
-        File.rename(existing_path, path)
-      else
-        profile_data = driver.get_profile_data(id)
-        File.write(path, profile_data)
-
-        puts "Saved boost profile data as #{filename}"
+          # Fix the filename and filter out the profile
+          File.rename(existing_path, path)
+          arr
+        else
+          # Include the profile
+          arr << profile
+        end
       end
 
-    else
-      puts "Profile data for batch ##{arg} not found on Boost"
+    # The variable `batch_numbers` now excludes those that were found
+    # on Boost or in the file system
+    if batch_numbers.length.positive?
+      LOGGER.log(
+        "Data for batch(es) #{batch_numbers.join(", ")} not found on Boost"
+      )
+
+    end
+    # The variable `profiles` now only includes those that were not
+    # found in the file system
+    if profiles.length.positive?
+      batch_numbers = profiles.map { |p| p["batch_number"] }
+
+      LOGGER.log(
+        "Found profile data for batch(es) #{batch_numbers.join(", ")} on Boost"
+      )
+
+      profile_list =
+        profiles.map do |profile|
+          { id: profile["prflMCd"], filename: profile["filename"] }
+        end
+
+      get_profile_data(profile_list, driver.cookie)
     end
 
     driver.quit
   end
-  # if matching_file
 end
-# if arg&.match?(/\d{4,}/)
 
-if arg && arg == "all"
+if ARGV[0] && ARGV[0] == "all"
   driver = ProfileMerge::BoostDriver.new
   driver.new_session
 
@@ -100,7 +157,9 @@ if arg && arg == "all"
   total_roast_count = profile_metadata["totalRstCnt"]
   count = total_roast_count - counter
 
-  puts "#{count} total roast(s) on Boost since last update"
+  LOGGER.log(
+    "#{count} total roast(s) on Boost since last update"
+  )
 
   # Exit fast if the new roast count is 0
   if count.positive?
@@ -115,7 +174,9 @@ if arg && arg == "all"
         b["rstDt"] <=> a["rstDt"]
       end.take(count)
 
-    puts "Found metadata for #{new_profiles.length} new roast(s)"
+    LOGGER.log(
+      "Found metadata for #{new_profiles.length} new roast(s)"
+    )
 
     # Exlude profiles that match Onyx Tonics' naming conventions
     profile_list =
@@ -124,7 +185,9 @@ if arg && arg == "all"
         !name.match?(/^\d{4,}\w/) && !name.match?(/(^|\s)bi($|\s)/i)
       end
 
-    puts "Identified #{profile_list.length} new roast(s) as belonging to Carrier"
+    LOGGER.log(
+      "Identified #{profile_list.length} new roast(s) as belonging to Carrier"
+    )
 
     profile_list.map! do |profile|
       id = profile["prflMCd"]
@@ -141,10 +204,7 @@ if arg && arg == "all"
       { id: id, filename: filename }
     end
 
-    File.write("profile_list.json", JSON.generate(profile_list))
-    File.write("cookie", driver.cookie)
-
-    IO.popen("elixir get_profile_data.exs").each { |line| puts line }
+    get_profile_data(profile_list, driver.cookie)
     File.write("counter", total_roast_count)
   end
   # if count.positive?
@@ -187,7 +247,9 @@ queue =
 # Select only truthy values
 queue.select! { |elem| elem }
 
-puts "Found #{queue.length} unmerged file pair(s)"
+LOGGER.log(
+  "Found #{queue.length} unmerged file pair(s)"
+)
 
 queue.each do |profile|
   batch_number = profile[:batch_number]
@@ -207,5 +269,7 @@ queue.each do |profile|
     file.write("#{batch_number} - #{target_path}\n")
   end
 
-  puts "Merged batch ##{batch_number}"
+  LOGGER.log("Merged batch ##{batch_number}")
 end
+
+LOGGER.log("Done. Exiting...")

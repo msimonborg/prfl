@@ -3,8 +3,11 @@
 require "selenium-webdriver"
 
 module ProfileMerge
+  # Wrapper around a selenium web driver
   class BoostDriver
     class CookieError < StandardError; end
+
+    require_relative "logger"
 
     BROWSER = :chrome
 
@@ -19,17 +22,17 @@ module ProfileMerge
     end
 
     def new_session
-      puts "Starting a new #{BROWSER.to_s.capitalize} session"
+      Logger.log "Starting a new #{BROWSER.to_s.capitalize} session"
       create_driver
 
-      puts "Attempting to login to Boost"
+      Logger.log "Attempting to login to Boost"
       log_in
 
-      puts "Login successful, retrieving session cookie"
+      Logger.log "Login successful, retrieving session cookie"
       @cookie = driver.manage.cookie_named("boost")[:value]
 
       path = "#{Dir.pwd}/cookie"
-      puts "Cookie retrieved, writing to #{path}"
+      Logger.log "Cookie retrieved, writing to #{path}"
       File.write(path, @cookie)
       self
     end

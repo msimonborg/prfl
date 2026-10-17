@@ -1,5 +1,3 @@
-require Logger
-
 profile_list =
   "profile_list.json"
   |> File.read!()
@@ -59,6 +57,7 @@ total_count = Enum.count(profile_list)
 Enum.with_index(stream, fn {:ok, filename}, index ->
   num = index + 1
 
-  Logger.info("Saved #{num} of #{total_count} profiles as #{filename}")
-  Logger.info("#{total_count - num} remaining")
+  IO.puts(
+    "Saved #{num} of #{total_count} profiles as #{filename}, #{total_count - num} remaining"
+  )
 end)

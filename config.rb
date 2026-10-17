@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 lookup_path = lambda do |path|
-  Pathname.new("../#{path}").realpath.to_path
+  Pathname.new("../../#{path}").realpath.to_path
 end
 
 ProfileMerge.config do |config|

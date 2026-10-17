@@ -25,7 +25,7 @@ def get_profile_data(profile_list, cookie)
   File.write("profile_list.json", JSON.generate(profile_list))
   File.write("cookie", cookie)
 
-  IO.popen("elixir get_profile_data.exs").each { |line| puts line }
+  IO.popen("elixir get_profile_data.exs").each { |line| LOGGER.log line }
 end
 
 # We attempt to fetch profile data for a list of batch numbers as the args
@@ -39,7 +39,7 @@ if !ARGV.empty? && ARGV.all? { |arg| arg.match?(/\d{4,}/) }
         end
       if matching_file
         LOGGER.log(
-          "Boost profile data for batch ##{arg} already exists at #{matching_file}"
+          "Boost profile data for batch ##{arg} already exists at #{CONFIG.boost_path}/#{matching_file}"
         )
       else
         arg

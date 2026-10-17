@@ -25,7 +25,7 @@ def get_profile_data(profile_list, cookie)
   File.write("profile_list.json", JSON.generate(profile_list))
   File.write("cookie", cookie)
 
-  IO.popen("elixir get_profile_data.exs").each { |line| LOGGER.log line }
+  IO.popen("bin/get_profile_data").each { |line| LOGGER.log line }
 end
 
 # We attempt to fetch profile data for a list of batch numbers as the args

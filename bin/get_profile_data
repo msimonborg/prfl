@@ -1,3 +1,5 @@
+#!/usr/bin/env elixir
+
 profile_list =
   "profile_list.json"
   |> File.read!()
@@ -5,7 +7,7 @@ profile_list =
 
 cookie = File.read!("cookie")
 
-data_dir = "../boost_data/raw"
+data_dir = "../../boost_data/raw"
 
 if !File.exists?(data_dir) do
   File.mkdir_p(data_dir)

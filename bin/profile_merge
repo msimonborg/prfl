@@ -1,8 +1,0 @@
-#!/usr/bin/env bash
-
-# add this script to your path
-
-current_dir=$(pwd)
-cd ~/Dropbox/carrier/artisan/profile_merge/
-bin/exe $@
-cd $current_dir

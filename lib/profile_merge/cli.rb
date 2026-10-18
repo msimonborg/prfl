@@ -55,13 +55,13 @@ module ProfileMerge
       batch_num = extract_batch_num(profile)
 
       filename =
-        if batch_num
-          "#{id}_#{batch_num}.json"
-        else
+        if batch_num.empty?
           "#{id}.json"
+        else
+          "#{id}_#{batch_num}.json"
         end
 
-      profile["filename"] = "#{filename}"
+      profile["filename"] = filename.to_s
     end
 
     def build_fetch_list

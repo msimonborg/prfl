@@ -12,6 +12,7 @@
 /profile_list.json
 /cookie
 /rename.exs
+/*fetch_list.json
 
 # rspec failure tracking
 .rspec_status

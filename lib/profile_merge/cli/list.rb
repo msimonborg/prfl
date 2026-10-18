@@ -2,14 +2,14 @@
 
 module ProfileMerge
   class CLI
-    # An object that stores and modifies the program state
+    # An object that stores and modifies the program state when handling
+    # the `--list`option
     class List < CLI
       attr_accessor :batch_nums, :old_batch_nums, :new_batch_nums,
                     :existing_profiles
 
       def initialize(opts)
         super(opts)
-        batch_nums
         self.batch_nums = []
         self.old_batch_nums = []
         self.new_batch_nums = []
@@ -21,7 +21,7 @@ module ProfileMerge
           if (matching_file = find_matching_file(batch_num))
             old_batch_nums << batch_num
             LOGGER.log(
-              "Boost profile data for batch ##{batch_num} already exists at #{CONFIG.boost_path}/#{matching_file}"
+              "Boost profile data for batch ##{batch_num} already exists at #{config.boost_path}/#{matching_file}"
             )
           else
             batch_nums << batch_num
@@ -73,14 +73,11 @@ module ProfileMerge
           next unless File.exist?(existing_path)
 
           # Fix the filename and reject the profile by returning a truthy value
-          rename_file(extract_batch_num(profile), existing_path, path)
+          batch_num = extract_batch_num(profile)
+          rename_file(batch_num, existing_path, path)
+          new_batch_nums.delete(batch_num) && old_batch_nums << batch_num
           existing_profiles << profile
         end
-      end
-
-      def add_filename(profile)
-        batch_num = extract_batch_num(profile)
-        profile["filename"] = "#{profile["prflMCd"]}_#{batch_num}.json"
       end
 
       def extract_paths(profile)

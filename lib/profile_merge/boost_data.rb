@@ -1,25 +1,27 @@
 # frozen_string_literal: true
 
-require 'json'
+require "json"
 
 module ProfileMerge
+  # The object that reads and stores data from a boost file
   class BoostData
-    SENSORS = [:ir, :bt, :it, :dt]
+    SENSORS = %i[ir bt it dt]
 
-    attr_accessor :source
-    attr_accessor :data
-    attr_accessor :timex
-    attr_accessor :ir_temps
-    attr_accessor :bt_temps
-    attr_accessor :it_temps
-    attr_accessor :dt_temps
-    attr_accessor :ir_ror
-    attr_accessor :bt_ror
-    attr_accessor :it_ror
-    attr_accessor :dt_ror
+    attr_accessor :source, :data, :timex, :ir_temps, :bt_temps, :it_temps, :dt_temps, :ir_ror, :bt_ror, :it_ror, :dt_ror
 
     def initialize(filename)
       self.timex = []
+      init_temps_and_rors
+      file = File.read(filename)
+      self.source = file
+      self.data = JSON.parse(file)
+      extract_data
+      derive_rors
+    end
+
+    private
+
+    def init_temps_and_rors
       self.ir_temps = []
       self.bt_temps = []
       self.it_temps = []
@@ -28,37 +30,29 @@ module ProfileMerge
       self.bt_ror = []
       self.it_ror = []
       self.dt_ror = []
-
-      file = File.read(filename)
-      self.source = file
-      self.data = JSON.parse(file)
-      self.extract_data
-      self.derive_rors
     end
 
-    private
-
     def extract_data
-      temps = self.data['temps']
+      temps = data["temps"]
 
       temps.each do |temp|
-        self.timex.push(temp['rstTime'].to_f)
-        self.ir_temps.push(temp['irFTemp'].to_f)
-        self.bt_temps.push(temp['internalFTemp'].to_f)
-        self.it_temps.push(temp['hotAirFTemp'].to_f)
-        self.dt_temps.push(temp['bandFTemp'].to_f)
+        timex.push(temp["rstTime"].to_f)
+        ir_temps.push(temp["irFTemp"].to_f)
+        bt_temps.push(temp["internalFTemp"].to_f)
+        it_temps.push(temp["hotAirFTemp"].to_f)
+        dt_temps.push(temp["bandFTemp"].to_f)
       end
     end
 
     def derive_rors
       SENSORS.each do |sensor|
-        self.derive_ror(sensor)
+        derive_ror(sensor)
       end
     end
 
     # sensor is a symbol, one of [:ir, :bt, :it, :dt]
     def derive_ror(sensor)
-      temps = self.send(:"#{sensor}_temps")
+      temps = send(:"#{sensor}_temps")
 
       # RoR values are computed over a 15 second interval, and multiplied by a
       # factor of 4.0 to produce a F/min delta value. Exception is made for IT
@@ -70,16 +64,16 @@ module ProfileMerge
         else
           4.0
         end
-      
+
       temps.each_index do |i|
-        res = 
+        res =
           if i < 15
             -1.0
           else
             (temps[i].to_f - temps[i - 15].to_f).round(1) * factor
           end
 
-        self.send(:"#{sensor}_ror").push(res)
+        send(:"#{sensor}_ror").push(res)
       end
     end
   end

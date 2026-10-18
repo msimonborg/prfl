@@ -8,13 +8,6 @@ require "json"
 
 require_relative "../config"
 
-CONFIG = ProfileMerge.config
-HISTORY = "history.txt"
-
-ARTISAN_DIR = Dir.new(CONFIG.artisan_path)
-BOOST_DIR = Dir.new(CONFIG.boost_path)
-TARGET_DIR = Dir.new(CONFIG.target_path)
-
 LOGGER = ProfileMerge::Logger
 
 opts = ProfileMerge::CLI::Options.new
@@ -25,171 +18,100 @@ opts.parse!
 if opts.list
   list = ProfileMerge::CLI::List.new(opts)
   list.filter_old_batch_nums
-  list.new_boost_session
 
-  LOGGER.log(
-    "Checking last 20 roasts for batch numbers #{list.batch_nums.join(", ")}"
-  )
+  unless list.batch_nums.empty?
+    list.new_boost_session
 
-  list.get_profile_metadata
-  list.extract_profiles
-
-  if list.profiles.length < list.batch_nums.length
-    LOGGER.log("Not all data was found in last 20 roasts")
-    LOGGER.log("Checking all #{list.total_roast_count} roasts")
-    list.search_all_profiles
-  end
-
-  list.filter_profiles_and_new_batch_nums
-
-  # `batch_nums` now excludes those that were found on Boost (`new_batch_nums`)
-  # or in the file system (`old_batch_nums`)
-  if list.batch_nums.length.positive?
     LOGGER.log(
-      "Data for batch(es) #{list.batch_nums.join(", ")} not found on Boost"
-    )
-  end
-  # `profiles` now only includes those that were not found in the file system
-  # The rest can be found in `existing_profiles`
-  if list.profiles.length.positive?
-\
-    LOGGER.log(
-      "Found profile data for batch(es) #{list.new_batch_nums.join(", ")} on Boost"
+      "Checking last 20 roasts for batch numbers #{list.batch_nums.join(", ")}"
     )
 
-    list.build_fetch_list
-    list.fetch_profile_data
-  end
+    list.get_profile_metadata
+    list.extract_profiles
 
-  list.driver.quit
+    if list.profiles.length < list.batch_nums.length
+      LOGGER.log("Not all data was found in last 20 roasts")
+      LOGGER.log("Checking all #{list.total_roast_count} roasts")
+      list.search_all_profiles
+    end
+
+    list.filter_profiles_and_new_batch_nums
+
+    # `batch_nums` now excludes those that were found on Boost (`new_batch_nums`)
+    # or in the file system (`old_batch_nums`)
+    if list.batch_nums.length.positive?
+      LOGGER.log(
+        "Data for batch(es) #{list.batch_nums.join(", ")} not found on Boost"
+      )
+    end
+    # `profiles` now only includes those that were not found in the file system
+    # The rest can be found in `existing_profiles`
+    if list.profiles.length.positive?
+  \
+      LOGGER.log(
+        "Found profile data for batch(es) #{list.new_batch_nums.join(", ")} on Boost"
+      )
+
+      list.build_fetch_list
+      list.fetch_profile_data
+    end
+
+    list.driver.quit
+  end
 end
+# if opts.list
 
 if opts.all
-  driver = ProfileMerge::BoostDriver.new
-  driver.new_session
-
-  response = driver.get_profile_metadata
-  profile_metadata = JSON.parse(response)
-
-  counter = File.read("counter").to_i
-  total_roast_count = profile_metadata["totalRstCnt"]
-  count = total_roast_count - counter
+  all = ProfileMerge::CLI::All.new(opts)
+  all.new_boost_session
+  all.get_profile_metadata
+  all.set_count
 
   LOGGER.log(
-    "#{count} total roast(s) on Boost since last update"
+    "#{all.new_count} total roast(s) on Boost since last update"
   )
 
   # Exit fast if the new roast count is 0
-  if count.positive?
+  if all.new_count.positive?
     # Only make a second request if the first response doesn't contain the
     # full count
-    response = driver.get_profile_metadata(count: count) if count > 20
+    all.get_profile_metadata(count: all.new_count) if all.new_count > 20
 
-    # The response should be sorted by most recent datetime, but we will
-    # do it anyway just in case, and take only the first `count` profiles
-    new_profiles =
-      JSON.parse(response)["profiles"].sort do |a, b|
-        b["rstDt"] <=> a["rstDt"]
-      end.take(count)
+    all.extract_profiles
 
     LOGGER.log(
-      "Found metadata for #{new_profiles.length} new roast(s)"
+      "Found metadata for #{all.profiles.length} new roast(s)"
     )
 
-    # Exlude profiles that match Onyx Tonics' naming conventions
-    profile_list =
-      new_profiles.filter do |profile|
-        name = profile["prflName"]
-        !name.match?(/^\d{4,}\w/) && !name.match?(/(^|\s)bi($|\s)/i)
-      end
+    all.filter_profiles
 
     LOGGER.log(
-      "Identified #{profile_list.length} new roast(s) as belonging to Carrier"
+      "Identified #{all.profiles.length} new roast(s) as belonging to Carrier"
     )
 
-    profile_list.map! do |profile|
-      id = profile["prflMCd"]
-      name = profile["prflName"]
-      batch_number = name.match(/^\d{4,}\b/)
+    all.profiles.each { |profile| all.add_filename(profile) }
 
-      filename =
-        if batch_number
-          "#{id}_#{batch_number}.json"
-        else
-          "#{id}.json"
-        end
+    all.build_fetch_list
 
-      { id: id, filename: filename }
-    end
-
-    get_profile_data(profile_list, driver.cookie)
-    File.write("counter", total_roast_count)
+    all.fetch_profile_data
+    all.update_counter
   end
-  # if count.positive?
+  # if all.new_count.positive?
 
-  driver.quit
+  all.driver.quit
 end
 # if opts.all
 
 unless opts.no_merge
-  history =
-    if File.exist?(HISTORY)
-      File.read(HISTORY)
-    else
-      ""
-    end
-
-  queue =
-    ARTISAN_DIR.children.collect do |artisan_file|
-      # valid batch number patterns: "#1234", "#12345", "#123456" etc.
-      match = artisan_file.match(/#\d{4,}/)
-
-      next unless match
-
-      batch_number = match.to_s.sub("#", "")
-
-      boost_file =
-        BOOST_DIR.children.find do |child|
-          child.match?("_#{batch_number}.json")
-        end
-
-      next unless boost_file && !history.match(batch_number)
-
-      {
-        batch_number: batch_number,
-        artisan_file: "#{CONFIG.artisan_path}/#{artisan_file}",
-        boost_file: "#{CONFIG.boost_path}/#{boost_file}",
-        target_path: "#{CONFIG.target_path}/#{artisan_file}"
-      }
-    end
-
-  # Select only truthy values
-  queue.select! { |elem| elem }
+  merge = ProfileMerge::CLI::Merge.new(opts)
+  merge.lookup_history
+  merge.build_queue
 
   LOGGER.log(
-    "Found #{queue.length} unmerged file pair(s)"
+    "Found #{merge.queue.length} unmerged file pair(s)"
   )
 
-  queue.each do |profile|
-    batch_number = profile[:batch_number]
-    artisan_file = profile[:artisan_file]
-    boost_file = profile[:boost_file]
-    target_path = profile[:target_path]
-    options = {
-      calibrate: batch_number.to_i <= 7775
-    }
-
-    artisan_data = ProfileMerge::ArtisanData.new(artisan_file, options)
-    boost_data = ProfileMerge::BoostData.new(boost_file)
-    artisan_data.merge_boost!(boost_data)
-    File.write(target_path, artisan_data.convert_to_raw)
-
-    File.open(HISTORY, "a") do |file|
-      file.write("#{batch_number} - #{target_path}\n")
-    end
-
-    LOGGER.log("Merged batch ##{batch_number}")
-  end
+  merge.merge_queue!
 end
 
 LOGGER.log("Done. Exiting...")

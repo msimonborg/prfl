@@ -47,7 +47,6 @@ if opts.list
     # `profiles` now only includes those that were not found in the file system
     # The rest can be found in `existing_profiles`
     if list.profiles.length.positive?
-  \
       LOGGER.log(
         "Found profile data for batch(es) #{list.new_batch_nums.join(", ")} on Boost"
       )

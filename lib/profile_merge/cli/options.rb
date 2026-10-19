@@ -12,9 +12,21 @@ module ProfileMerge
       def initialize
         self.parser = OptionParser.new
         parser.banner = "Usage: profile_merge [options]"
+        set_version_option
         set_list_option
         set_all_option
         set_no_merge_option
+      end
+
+      def set_version_option
+        parser.on("-v", "--version", "Show version") do |_|
+          if File.exist?("VERSION")
+            puts File.read("VERSION").strip
+          else
+            puts ProfileMerge::VERSION
+          end
+          exit
+        end
       end
 
       def set_no_merge_option

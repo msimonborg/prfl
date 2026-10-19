@@ -1,5 +1,3 @@
-#!/usr/bin/env elixir
-
 fetch_list =
   "fetch_list.json"
   |> File.read!()
@@ -7,7 +5,12 @@ fetch_list =
 
 cookie = File.read!("cookie")
 
-data_dir = "../../boost_data/raw"
+data_dir =
+  if System.get_env("PRFL_ENV") == "prod" do
+    System.get_env("PRFL_BOOST_PATH")
+  else
+    Path.join(__DIR__, "../data/boost_data/raw")
+  end
 
 if !File.exists?(data_dir) do
   File.mkdir_p(data_dir)

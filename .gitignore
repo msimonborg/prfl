@@ -13,6 +13,7 @@
 /cookie
 /rename.exs
 /*fetch_list.json
+/data/
 
 # rspec failure tracking
 .rspec_status

@@ -1,19 +1,26 @@
-In `config.rb`, Set constants for the required directory paths:
+In `~/.zprofile`, set environment variables
 ```
-ARTISAN_PATH = '/foo/'
-BOOST_PATH = '/bar/'
-TARGET_PATH = '/baz/'
-
+export PRFL_ARTISAN_PATH=~/Dropbox/roasting/artisan/roasts/raw
+export PRFL_BOOST_PATH=~/Dropbox/roasting/boost_data/raw
+export PRFL_TARGET_PATH=~/Dropbox/roasting/artisan/roasts/merged
+export PRFL_BOOST_EMAIL="email@email.com"
+export PRFL_BOOST_PASSWORD="password"
 ```
 
-Make sure permissions are set to run the executable:
+Make sure permissions are set to run the development executable:
 ```
 chmod +x bin/exe
 ```
 
 then:
 ```
-bin/exe
+bin/exe [options]
+```
+
+# Production
+To set up a production environment, open `~/.zshrc` and add the `prfl` executable to the `$PATH`
+```
+PATH=$PATH:~/Library/CloudStorage/Dropbox/roasting/lib/bin
 ```
 
 # TODO:

@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+
+if [ -z "$1" ]; then
+  echo "Usage: deploy <version>"
+  echo "Example: deploy 1.0.0"
+  exit 1
+fi
+
+current_dir=$(pwd)
+
+version=$1
+staging_dir=".deployment/profile_merge@$version"
+deploy_dir="$HOME/Dropbox/roasting/lib/src"
+
+mkdir -p $staging_dir
+
+mkdir -p $staging_dir/lib/
+cp -r lib/* $staging_dir/lib/
+
+mkdir -p $staging_dir/bin/
+cp bin/exe $staging_dir/bin/
+
+mkdir -p $staging_dir/src/
+cp -r src/* $staging_dir/src/
+
+echo ${version} > $staging_dir/VERSION
+cp config.rb Gemfile .tool-versions profile_merge.gemspec $staging_dir/
+
+cd $deploy_dir
+
+if [ ! -d "past_versions" ]; then
+    mkdir past_versions
+fi
+
+if [ -d "profile_merge" ]; then
+    old_version=$(cat profile_merge/VERSION)
+
+    if [ "$old_version" == "$version" ]; then
+        echo "Version $version is already deployed."
+        rm -rf $current_dir/$staging_dir
+        cd $current_dir
+        exit 0
+    fi
+
+    cp profile_merge/history.txt profile_merge/counter $current_dir/$staging_dir/
+    mv profile_merge past_versions/profile_merge@$old_version
+fi
+
+cp -r $current_dir/$staging_dir $deploy_dir/profile_merge
+
+cd profile_merge
+bundle config set without 'development test' && bundle install
+
+cd $current_dir
+
+echo ""
+echo "Deployment of profile_merge@$version completed successfully!"

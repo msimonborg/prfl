@@ -2,7 +2,7 @@
 
 dev_path = ->(path) { Pathname.new("data/#{path}").realpath.to_path }
 
-if ENV["RUBY_ENV"] == "prod"
+if ENV["PRFL_ENV"] == "prod"
   ProfileMerge.config do |config|
     config.artisan_path =  ENV["PRFL_ARTISAN_PATH"]
     config.boost_path   = ENV["PRFL_BOOST_PATH"]

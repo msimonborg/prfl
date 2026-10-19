@@ -5,11 +5,12 @@ source "https://rubygems.org"
 # Specify your gem's dependencies in profile_merge.gemspec
 gemspec
 
-gem "irb"
-gem "rake", "~> 13.0"
+gem "irb", group: :development
 
-gem "rspec", "~> 3.0"
+gem "rake", "~> 13.0", group: :development
 
-gem "rubocop", "~> 1.21"
+gem "rspec", "~> 3.0", group: :test
+
+gem "rubocop", "~> 1.21", group: :development
 
 gem 'selenium-webdriver', '>= 4.51'

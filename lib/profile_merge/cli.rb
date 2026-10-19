@@ -43,7 +43,7 @@ module ProfileMerge
       File.write("fetch_list.json", JSON.generate(fetch_list))
       File.write("cookie", driver.cookie)
 
-      IO.popen("bin/fetch_profile_data").each { |line| LOGGER.log line }
+      IO.popen("elixir src/fetch_profile_data.exs").each { |line| LOGGER.log line }
     end
 
     def extract_batch_num(profile)

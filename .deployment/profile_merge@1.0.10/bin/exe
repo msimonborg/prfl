@@ -1,0 +1,116 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "bundler/setup"
+require "profile_merge"
+require "profile_merge/cli"
+require "json"
+
+require_relative "../config"
+
+LOGGER = ProfileMerge::Logger
+
+opts = ProfileMerge::CLI::Options.new
+opts.parse!
+
+# We attempt to fetch profile data for a list of batch numbers as the args
+# e.g. `$ profile_merge -l 7825,7828,7834`
+if opts.list
+  list = ProfileMerge::CLI::List.new(opts)
+  list.filter_old_batch_nums
+
+  unless list.batch_nums.empty?
+    list.new_boost_session
+
+    LOGGER.log(
+      "Checking last 20 roasts for batch numbers #{list.batch_nums.join(", ")}"
+    )
+
+    list.get_profile_metadata
+    list.extract_profiles
+
+    if list.profiles.length < list.batch_nums.length
+      LOGGER.log("Not all data was found in last 20 roasts")
+      LOGGER.log("Checking all #{list.total_roast_count} roasts")
+      list.search_all_profiles
+    end
+
+    list.filter_profiles_and_new_batch_nums
+
+    # `batch_nums` now excludes those that were found on Boost (`new_batch_nums`)
+    # or in the file system (`old_batch_nums`)
+    if list.batch_nums.length.positive?
+      LOGGER.log(
+        "Data for batch(es) #{list.batch_nums.join(", ")} not found on Boost"
+      )
+    end
+    # `profiles` now only includes those that were not found in the file system
+    # The rest can be found in `existing_profiles`
+    if list.profiles.length.positive?
+      LOGGER.log(
+        "Found profile data for batch(es) #{list.new_batch_nums.join(", ")} on Boost"
+      )
+
+      list.build_fetch_list
+      list.fetch_profile_data
+    end
+
+    list.driver.quit
+  end
+end
+# if opts.list
+
+if opts.all
+  all = ProfileMerge::CLI::All.new(opts)
+  all.new_boost_session
+  all.get_profile_metadata
+  all.set_count
+
+  LOGGER.log(
+    "#{all.new_count} total roast(s) on Boost since last update"
+  )
+
+  # Exit fast if the new roast count is 0
+  if all.new_count.positive?
+    # Only make a second request if the first response doesn't contain the
+    # full count
+    all.get_profile_metadata(count: all.new_count) if all.new_count > 20
+
+    all.extract_profiles
+
+    LOGGER.log(
+      "Found metadata for #{all.profiles.length} new roast(s)"
+    )
+
+    all.filter_profiles
+
+    LOGGER.log(
+      "Identified #{all.profiles.length} new roast(s) as belonging to Carrier"
+    )
+
+    all.profiles.each { |profile| all.add_filename(profile) }
+
+    all.build_fetch_list
+
+    all.fetch_profile_data
+    all.update_counter
+  end
+  # if all.new_count.positive?
+
+  all.driver.quit
+end
+# if opts.all
+
+unless opts.no_merge
+  merge = ProfileMerge::CLI::Merge.new(opts)
+  merge.lookup_history
+  merge.build_queue
+
+  LOGGER.log(
+    "Found #{merge.queue.length} unmerged file pair(s)"
+  )
+
+  merge.merge_queue!
+end
+
+LOGGER.log("Done. Exiting...")

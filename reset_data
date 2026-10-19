@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+rm -f data/artisan/roasts/merged/*
+rm -f data/boost_data/raw/*

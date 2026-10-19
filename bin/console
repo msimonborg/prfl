@@ -3,6 +3,11 @@
 
 require "bundler/setup"
 require "profile_merge"
+require "profile_merge/cli"
+require "json"
+
+# Comment this line if you do not want to load the config
+require_relative "../config"
 
 # You can add fixtures and/or initialization code here to make experimenting
 # with your gem easier. You can also use a different console, if you like.

@@ -1,8 +1,8 @@
 In `~/.zprofile`, set environment variables
 ```
-export PRFL_ARTISAN_PATH=~/Dropbox/roasting/artisan/roasts/raw
-export PRFL_BOOST_PATH=~/Dropbox/roasting/boost_data/raw
-export PRFL_TARGET_PATH=~/Dropbox/roasting/artisan/roasts/merged
+export PRFL_ARTISAN_PATH=/Users/$USER/Dropbox/roasting/artisan/roasts/raw
+export PRFL_BOOST_PATH=/Users/$USER/Dropbox/roasting/boost_data/raw
+export PRFL_TARGET_PATH=/Users/$USER/Dropbox/roasting/artisan/roasts/merged
 export PRFL_BOOST_EMAIL="email@email.com"
 export PRFL_BOOST_PASSWORD="password"
 ```
@@ -20,7 +20,8 @@ bin/exe [options]
 # Production
 To set up a production environment, open `~/.zshrc` and add the `prfl` executable to the `$PATH`
 ```
-PATH=$PATH:~/Library/CloudStorage/Dropbox/roasting/lib/bin
+# add prfl to path
+PATH=$PATH:/Users/$USER/Dropbox/roasting/lib/bin
 ```
 
 # TODO:

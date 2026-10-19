@@ -37,7 +37,7 @@ if [ -d "profile_merge" ]; then
 
     if [ "$old_version" == "$version" ]; then
         echo "Version $version is already deployed."
-        rm -rf $current_dir/$staging_dir
+        rm -rf $current_dir/.deployment
         cd $current_dir
         exit 0
     fi
@@ -51,6 +51,7 @@ cp -r $current_dir/$staging_dir $deploy_dir/profile_merge
 cd profile_merge
 bundle config set without 'development test' && bundle install
 
+rm -rf $current_dir/.deployment
 cd $current_dir
 
 echo ""

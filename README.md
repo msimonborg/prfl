@@ -52,14 +52,14 @@ $ bin/deploy VERSION
 Pay attention to versioning. The deploy script will not run if you do not provide a version, nor will it run if you are trying to deploy the same version that is already in production. Before deploying, try running `$ prfl --version` to confirm the current version and to help decide what the new version number should be. `TODO:` Deploy script should also fail if you try to deploy a version number that is older than the current one.
 
 # TODO:
-[x] Improve README
+- [x]  Improve README
 
-* Add "prflName" value from profile metadata to profile data for all existing profile data files and new downloads
+- [ ] Add "prflName" value from profile metadata to profile data for all existing profile data files and new downloads
 
-* In `fetch_profile_data.exs`, write files to the file system in the correct sorted order (descending by most recent datetime) *or* sort them at the merge step. The goal is for merged files to be listed in the correct order when sorted by datetime of the roast
+- [ ] In `fetch_profile_data.exs`, write files to the file system in the correct sorted order (descending by most recent datetime) *or* sort them at the merge step. The goal is for merged files to be listed in the correct order when sorted by datetime of the roast
 
-* Add `-r --reference BATCHES` option to add the listed batches to the reference directory and move the ones they are replacing to the archives. Only merged profiles should be references, so it should fail if the profile is not merged *or* make an effort to merge it first
+- [ ] Add `-r --reference BATCHES` option to add the listed batches to the reference directory and move the ones they are replacing to the archives. Only merged profiles should be references, so it should fail if the profile is not merged *or* make an effort to merge it first
 
-* Add `-m --metadata` option to grab and persist metadata for all roasts
+- [ ] Add `-m --metadata` option to grab and persist metadata for all roasts
 
-* Anytime we grab up-to-date metadata for all roasts, persist it. Check local metadata first whenever feasible before requesting all from the server
+- [ ] Anytime we grab up-to-date metadata for all roasts, persist it. Check local metadata first whenever feasible before requesting all from the server

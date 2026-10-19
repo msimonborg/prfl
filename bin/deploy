@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 
 if [ -z "$1" ]; then
-  echo "Usage: deploy <version>"
-  echo "Example: deploy 1.0.0"
+  echo "Usage: bin/deploy <version>"
+  echo "Example: bin/deploy 1.0.0"
   exit 1
 fi
 
 current_dir=$(pwd)
 
 version=$1
-staging_dir=".deployment/profile_merge@$version"
+staging_dir=".deployment/prfl@$version"
 deploy_dir="$HOME/Dropbox/roasting/lib/src"
 
 mkdir -p $staging_dir
@@ -24,7 +24,7 @@ mkdir -p $staging_dir/src/
 cp -r src/* $staging_dir/src/
 
 echo ${version} > $staging_dir/VERSION
-cp config.rb Gemfile .tool-versions profile_merge.gemspec $staging_dir/
+cp config.rb Gemfile .tool-versions prfl.gemspec $staging_dir/
 
 cd $deploy_dir
 
@@ -32,8 +32,8 @@ if [ ! -d "past_versions" ]; then
     mkdir past_versions
 fi
 
-if [ -d "profile_merge" ]; then
-    old_version=$(cat profile_merge/VERSION)
+if [ -d "prfl" ]; then
+    old_version=$(cat prfl/VERSION)
 
     if [ "$old_version" == "$version" ]; then
         echo "Version $version is already deployed."
@@ -42,17 +42,17 @@ if [ -d "profile_merge" ]; then
         exit 0
     fi
 
-    cp profile_merge/history.txt profile_merge/counter $current_dir/$staging_dir/
-    mv profile_merge past_versions/profile_merge@$old_version
+    cp prfl/history.txt prfl/counter $current_dir/$staging_dir/
+    mv prfl past_versions/prfl@$old_version
 fi
 
-cp -r $current_dir/$staging_dir $deploy_dir/profile_merge
+cp -r $current_dir/$staging_dir $deploy_dir/prfl
 
-cd profile_merge
+cd prfl
 bundle config set without 'development test' && bundle install
 
 rm -rf $current_dir/.deployment
 cd $current_dir
 
 echo ""
-echo "Deployment of profile_merge@$version completed successfully!"
+echo "Deployment of prfl@$version completed successfully!"

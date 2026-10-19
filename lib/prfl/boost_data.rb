@@ -2,7 +2,7 @@
 
 require "json"
 
-module ProfileMerge
+module Prfl
   # The object that reads and stores data from a boost file
   class BoostData
     SENSORS = %i[ir bt it dt]

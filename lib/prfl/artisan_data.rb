@@ -2,7 +2,7 @@
 
 require "json"
 
-module ProfileMerge
+module Prfl
   class ArtisanData
     CALIBRATION_VALUE = -10.0
     EXTRA_DEVICES = [25, 25, 25, 25]

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module ProfileMerge
+module Prfl
   class CLI
     # An object that stores and modifies the program state when handling
     # the merge
@@ -60,8 +60,8 @@ module ProfileMerge
 
       def merge!(profile)
         options = build_options(profile)
-        artisan_data = ProfileMerge::ArtisanData.new(profile[:artisan_file], options)
-        boost_data = ProfileMerge::BoostData.new(profile[:boost_file])
+        artisan_data = Prfl::ArtisanData.new(profile[:artisan_file], options)
+        boost_data = Prfl::BoostData.new(profile[:boost_file])
 
         artisan_data.merge_boost!(boost_data)
 

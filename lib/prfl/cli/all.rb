@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module ProfileMerge
+module Prfl
   class CLI
     # An object that stores and modifies the program state when handling
     # the `--all` option

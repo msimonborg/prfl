@@ -2,21 +2,21 @@
 # frozen_string_literal: true
 
 require "bundler/setup"
-require "profile_merge"
-require "profile_merge/cli"
+require "prfl"
+require "prfl/cli"
 require "json"
 
 require_relative "../config"
 
-LOGGER = ProfileMerge::Logger
+LOGGER = Prfl::Logger
 
-opts = ProfileMerge::CLI::Options.new
+opts = Prfl::CLI::Options.new
 opts.parse!
 
 # We attempt to fetch profile data for a list of batch numbers as the args
-# e.g. `$ profile_merge -l 7825,7828,7834`
+# e.g. `$ prfl -l 7825,7828,7834`
 if opts.list
-  list = ProfileMerge::CLI::List.new(opts)
+  list = Prfl::CLI::List.new(opts)
   list.filter_old_batch_nums
 
   unless list.batch_nums.empty?
@@ -61,7 +61,7 @@ end
 # if opts.list
 
 if opts.all
-  all = ProfileMerge::CLI::All.new(opts)
+  all = Prfl::CLI::All.new(opts)
   all.new_boost_session
   all.get_profile_metadata
   all.set_count
@@ -102,7 +102,7 @@ end
 # if opts.all
 
 unless opts.no_merge
-  merge = ProfileMerge::CLI::Merge.new(opts)
+  merge = Prfl::CLI::Merge.new(opts)
   merge.lookup_history
   merge.build_queue
 

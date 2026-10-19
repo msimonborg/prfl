@@ -2,8 +2,8 @@
 # frozen_string_literal: true
 
 require "bundler/setup"
-require "profile_merge"
-require "profile_merge/cli"
+require "prfl"
+require "prfl/cli"
 require "json"
 
 # Comment this line if you do not want to load the config

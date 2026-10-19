@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-require_relative "lib/profile_merge/version"
+require_relative "lib/prfl/version"
 
 Gem::Specification.new do |spec|
-  spec.name = "profile_merge"
-  spec.version = ProfileMerge::VERSION
+  spec.name = "prfl"
+  spec.version = Prfl::VERSION
   spec.authors = ["Matthew Borg"]
   spec.email = ["msimonborg@gmail.com"]
 

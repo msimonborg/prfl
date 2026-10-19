@@ -2,7 +2,7 @@
 
 require "selenium-webdriver"
 
-module ProfileMerge
+module Prfl
   # Wrapper around a selenium web driver
   class BoostDriver
     class CookieError < StandardError; end
@@ -14,7 +14,7 @@ module ProfileMerge
     attr_reader :cookie, :driver
 
     def initialize
-      @config = ProfileMerge.config || ProfileMerge::Config.new
+      @config = Prfl.config || Prfl::Config.new
     end
 
     def quit

@@ -44,14 +44,14 @@ fun = fn profile ->
 end
 
 children = [
-  {Task.Supervisor, name: ProfileMerge.TaskSupervisor}
+  {Task.Supervisor, name: Prfl.TaskSupervisor}
 ]
 
 Supervisor.start_link(children, strategy: :one_for_one)
 
 stream =
   Task.Supervisor.async_stream(
-    ProfileMerge.TaskSupervisor,
+    Prfl.TaskSupervisor,
     fetch_list,
     fun,
     timeout: :infinity

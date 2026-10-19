@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module ProfileMerge
+module Prfl
   # Logging functions
   module Logger
     def self.log(message)

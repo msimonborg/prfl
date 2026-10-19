@@ -6,7 +6,7 @@ require_relative "cli/merge"
 require_relative "cli/options"
 require_relative "boost_driver"
 
-module ProfileMerge
+module Prfl
   # Superclass of all CLI subprograms
   class CLI
     attr_accessor :opts, :driver, :profile_metadata, :total_roast_count,
@@ -18,7 +18,7 @@ module ProfileMerge
       self.profile_metadata = []
       self.profiles = []
       self.fetch_list = []
-      self.config = ProfileMerge.config
+      self.config = Prfl.config
       set_dirs
     end
 
@@ -29,7 +29,7 @@ module ProfileMerge
     end
 
     def new_boost_session
-      self.driver = ProfileMerge::BoostDriver.new
+      self.driver = Prfl::BoostDriver.new
       driver.new_session
     end
 

@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
-require_relative "profile_merge/artisan_data"
-require_relative "profile_merge/boost_data"
-require_relative "profile_merge/boost_driver"
-require_relative "profile_merge/logger"
-require_relative "profile_merge/version"
+require_relative "prfl/artisan_data"
+require_relative "prfl/boost_data"
+require_relative "prfl/boost_driver"
+require_relative "prfl/logger"
+require_relative "prfl/version"
 
-module ProfileMerge
+module Prfl
   class Error < StandardError; end
 
   class Config

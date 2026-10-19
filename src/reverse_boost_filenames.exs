@@ -1,5 +1,5 @@
 # To execute, run `$ elixir scripts/reverse_boost_filenames.exs` from the
-# `profile_merge` parent directory
+# `prfl` parent directory
 
 # This script reverses the order of the boost filename format
 # e.g. "20261015052053076567_7835.json" becomes "7835_20261015052053076567.json"
@@ -32,14 +32,14 @@ rename_files =
   end
 
 children = [
-  {Task.Supervisor, name: ProfileMerge.ScriptSupervisor}
+  {Task.Supervisor, name: Prfl.ScriptSupervisor}
 ]
 
 Supervisor.start_link(children, strategy: :one_for_one)
 
 stream1 =
   Task.Supervisor.async_stream(
-    ProfileMerge.ScriptSupervisor,
+    Prfl.ScriptSupervisor,
     file_list,
     reverse_names
   )
@@ -48,7 +48,7 @@ mv_list = Enum.map(stream1, fn {:ok, result} -> result end)
 
 stream2 =
   Task.Supervisor.async_stream(
-    ProfileMerge.ScriptSupervisor,
+    Prfl.ScriptSupervisor,
     mv_list,
     rename_files
   )

@@ -2,16 +2,16 @@
 
 require "optparse"
 
-module ProfileMerge
+module Prfl
   class CLI
     # An options parser for the CLI
     class Options
-      class Error < ProfileMerge::Error; end
+      class Error < Prfl::Error; end
       attr_accessor :list, :all, :no_merge, :parser
 
       def initialize
         self.parser = OptionParser.new
-        parser.banner = "Usage: profile_merge [options]"
+        parser.banner = "Usage: prfl [options]"
         set_version_option
         set_list_option
         set_all_option
@@ -23,7 +23,7 @@ module ProfileMerge
           if File.exist?("VERSION")
             puts File.read("VERSION").strip
           else
-            puts ProfileMerge::VERSION
+            puts Prfl::VERSION
           end
           exit
         end

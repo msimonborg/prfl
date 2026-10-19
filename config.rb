@@ -1,13 +1,22 @@
 # frozen_string_literal: true
 
-lookup_path = lambda do |path|
-  Pathname.new("../../#{path}").realpath.to_path
+dev_path = ->(path) { Pathname.new("data/#{path}").realpath.to_path }
+
+if ENV["RUBY_ENV"] == "prod"
+  ProfileMerge.config do |config|
+    config.artisan_path =  ENV["PRFL_ARTISAN_PATH"]
+    config.boost_path   = ENV["PRFL_BOOST_PATH"]
+    config.target_path  = ENV["PRFL_TARGET_PATH"]
+  end
+else
+  ProfileMerge.config do |config|
+    config.artisan_path = dev_path.call("artisan/roasts/raw")
+    config.boost_path   = dev_path.call("boost_data/raw")
+    config.target_path  = dev_path.call("artisan/roasts/merged")
+  end
 end
 
 ProfileMerge.config do |config|
-  config.artisan_path = lookup_path.call("roasts/raw")
-  config.boost_path = lookup_path.call("boost_data/raw")
-  config.target_path = lookup_path.call("roasts/merged")
-  config.boost_email = "matt@carrierroasting.com"
-  config.boost_password = "jepkyj-hampe4-qasnUc"
+  config.boost_email    = ENV["PRFL_BOOST_EMAIL"]
+  config.boost_password = ENV["PRFL_BOOST_PASSWORD"]
 end

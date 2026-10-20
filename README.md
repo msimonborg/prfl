@@ -52,9 +52,13 @@ $ bin/deploy VERSION
 Pay attention to versioning. The deploy script will not run if you do not provide a version, nor will it run if you are trying to deploy the same version that is already in production. Before deploying, try running `$ prfl --version` to confirm the current version and to help decide what the new version number should be. `TODO:` Deploy script should also fail if you try to deploy a version number that is older than the current one.
 
 # TODO:
-- [x]  Improve README
+- [x] Improve README
 
 - [ ] *ADD TESTS!!!* Do this before working on any new features for production
+
+- [ ] Write a Ruby script that wraps the deploy shell script, so we can pull the version number from the `Prfl::VERSION` constant. This way, we can have one source of truth for the version number and prevent accidental bad-versioning. Move the shell script to `src` and rename it `deploy.sh`. Remove its executable permission.
+
+- [ ] Pull all production directories in the deploy shell script from environment variables (or from `config.rb` so we can do test deployments in dummy directories). Write an install script that installs the executable in a directory that is specified in an environment variable, and then optionally executes the deploy script. Call the install script from a Ruby wrapper, a la the deploy script.
 
 - [ ] Add "prflName" value from profile metadata to profile data for all existing profile data files and new downloads
 

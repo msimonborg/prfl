@@ -54,6 +54,8 @@ Pay attention to versioning. The deploy script will not run if you do not provid
 # TODO:
 - [x]  Improve README
 
+- [ ] *ADD TESTS!!!* Do this before working on any new features for production
+
 - [ ] Add "prflName" value from profile metadata to profile data for all existing profile data files and new downloads
 
 - [ ] Determine which boost profiles are replications by checking "prflName" in the metadata and add that status to the profile data for all existing and future files

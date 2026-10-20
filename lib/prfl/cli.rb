@@ -9,6 +9,8 @@ require_relative "boost_driver"
 module Prfl
   # Superclass of all CLI subprograms
   class CLI
+    include Logger
+
     attr_accessor :opts, :driver, :profile_metadata, :total_roast_count,
                   :response, :profiles, :config, :boost_dir, :artisan_dir,
                   :target_dir, :fetch_list
@@ -20,6 +22,18 @@ module Prfl
       self.fetch_list = []
       self.config = Prfl.config
       set_dirs
+    end
+
+    def all
+      All.new(opts)
+    end
+
+    def list
+      List.new(opts)
+    end
+
+    def merge
+      Merge.new(opts)
     end
 
     def set_dirs
@@ -43,7 +57,7 @@ module Prfl
       File.write("fetch_list.json", JSON.generate(fetch_list))
       File.write("cookie", driver.cookie)
 
-      IO.popen("elixir src/fetch_profile_data.exs").each { |line| LOGGER.log line }
+      IO.popen("elixir src/fetch_profile_data.exs").each { |line| log line }
     end
 
     def extract_batch_num(profile)

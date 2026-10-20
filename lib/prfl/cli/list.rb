@@ -20,7 +20,7 @@ module Prfl
         opts.list.each do |batch_num|
           if (matching_file = find_matching_file(batch_num))
             old_batch_nums << batch_num
-            LOGGER.log(
+            log(
               "Boost profile data for batch ##{batch_num} already exists at #{config.boost_path}/#{matching_file}"
             )
           else
@@ -94,13 +94,8 @@ module Prfl
       end
 
       def rename_file(batch_num, existing_path, path)
-        LOGGER.log(
-          "Matched #{batch_num} to existing file #{existing_path}"
-        )
-
-        LOGGER.log(
-          "Renaming existing file to #{path}"
-        )
+        log "Matched #{batch_num} to existing file #{existing_path}"
+        log "Renaming existing file to #{path}"
 
         File.rename(existing_path, path)
       end

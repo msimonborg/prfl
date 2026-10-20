@@ -2,12 +2,13 @@
 
 require "selenium-webdriver"
 
+require_relative "logger"
+
 module Prfl
   # Wrapper around a selenium web driver
   class BoostDriver
     class CookieError < StandardError; end
-
-    require_relative "logger"
+    include Logger
 
     BROWSER = :chrome
 
@@ -22,17 +23,17 @@ module Prfl
     end
 
     def new_session
-      Logger.log "Starting a new #{BROWSER.to_s.capitalize} session"
+      log "Starting a new #{BROWSER.to_s.capitalize} session"
       create_driver
 
-      Logger.log "Attempting to login to Boost"
+      log "Attempting to login to Boost"
       log_in
 
-      Logger.log "Login successful, retrieving session cookie"
+      log "Login successful, retrieving session cookie"
       @cookie = driver.manage.cookie_named("boost")[:value]
 
       path = "#{Dir.pwd}/cookie"
-      Logger.log "Cookie retrieved, writing to #{path}"
+      log "Cookie retrieved, writing to #{path}"
       File.write(path, @cookie)
       self
     end

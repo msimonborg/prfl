@@ -71,7 +71,7 @@ module Prfl
           file.write("#{profile[:batch_number]} - #{profile[:target_path]}\n")
         end
 
-        LOGGER.log("Merged batch ##{profile[:batch_number]}")
+        log "Merged batch ##{profile[:batch_number]}"
       end
 
       def build_options(profile)

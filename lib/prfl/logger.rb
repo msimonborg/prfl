@@ -3,14 +3,14 @@
 module Prfl
   # Logging functions
   module Logger
-    def self.log(message)
+    def log(message)
       puts <<~LOG
         #{time_stamp} #{message}
 
       LOG
     end
 
-    def self.time_stamp
+    def time_stamp
       "[ #{Time.now.strftime("%H:%M:%S.%L")} ]"
     end
   end

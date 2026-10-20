@@ -6,6 +6,7 @@ require_relative "prfl/boost_driver"
 require_relative "prfl/logger"
 require_relative "prfl/version"
 
+# Top namespace
 module Prfl
   class Error < StandardError; end
 

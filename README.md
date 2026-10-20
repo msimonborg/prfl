@@ -36,9 +36,9 @@ PATH=$PATH:/Users/$USER/Dropbox/roasting/lib/bin
 
 Open `~/.zprofile` and add these environment variables
 ```bash
-export PRFL_ARTISAN_PATH=/Users/$USER/Dropbox/roasting/artisan/roasts/raw
-export PRFL_BOOST_PATH=/Users/$USER/Dropbox/roasting/boost_data/raw
-export PRFL_TARGET_PATH=/Users/$USER/Dropbox/roasting/artisan/roasts/merged
+export PRFL_ARTISAN_PATH=/path/to/artisan/roasts/data
+export PRFL_BOOST_PATH=/path/to/boost/roasts/data
+export PRFL_TARGET_PATH=/path/to/merged/roasts/data
 export PRFL_BOOST_EMAIL="email@email.com"
 export PRFL_BOOST_PASSWORD="password"
 ```

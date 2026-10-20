@@ -56,6 +56,10 @@ Pay attention to versioning. The deploy script will not run if you do not provid
 
 - [ ] Add "prflName" value from profile metadata to profile data for all existing profile data files and new downloads
 
+- [ ] Determine which boost profiles are replications by checking "prflName" in the metadata and add that status to the profile data for all existing and future files
+
+- [ ] Determine which profiles were taken over manually midway by looking for an unnamed event in the artisan data
+
 - [ ] In `fetch_profile_data.exs`, write files to the file system in the correct sorted order (descending by most recent datetime) *or* sort them at the merge step. The goal is for merged files to be listed in the correct order when sorted by datetime of the roast
 
 - [ ] Add `-r --reference BATCHES` option to add the listed batches to the reference directory and move the ones they are replacing to the archives. Only merged profiles should be references, so it should fail if the profile is not merged *or* make an effort to merge it first

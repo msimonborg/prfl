@@ -6,11 +6,11 @@ if [ -z "$1" ]; then
   exit 1
 fi
 
-current_dir=$(pwd)
+dev_dir=$(pwd)
 
 version=$1
-staging_dir=".deployment/prfl@$version"
-deploy_dir="$HOME/Dropbox/roasting/lib/src"
+staging_dir="$dev_dir/.deployment/prfl@$version"
+deploy_dir=${PRFL_LIB_PATH}
 
 mkdir -p $staging_dir
 
@@ -26,33 +26,41 @@ cp -r src/* $staging_dir/src/
 echo ${version} > $staging_dir/VERSION
 cp config.rb Gemfile .tool-versions prfl.gemspec $staging_dir/
 
+if [ ! -d "$deploy_dir" ]; then
+    echo "Deployment directory $deploy_dir does not exist. Creating it..."
+    mkdir -p $deploy_dir
+fi
+
 cd $deploy_dir
 
 if [ ! -d "past_versions" ]; then
+    echo "Creating past_versions directory..."
     mkdir past_versions
 fi
 
 if [ -d "prfl" ]; then
+    echo "Existing deployment found. Checking version..."
     old_version=$(cat prfl/VERSION)
 
     if [ "$old_version" == "$version" ]; then
         echo "Version $version is already deployed."
-        rm -rf $current_dir/.deployment
-        cd $current_dir
-        exit 0
+        echo "No changes made. Exiting."
+        rm -rf $dev_dir/.deployment
+        cd $dev_dir
+        exit 1
     fi
 
-    cp prfl/history.txt prfl/counter $current_dir/$staging_dir/
+    cp prfl/history.txt prfl/counter $staging_dir/
     mv prfl past_versions/prfl@$old_version
 fi
 
-cp -r $current_dir/$staging_dir $deploy_dir/prfl
+cp -r $staging_dir $deploy_dir/prfl
 
 cd prfl
 bundle config set without 'development test' && bundle install
 
-rm -rf $current_dir/.deployment
-cd $current_dir
+rm -rf $dev_dir/.deployment
+cd $dev_dir
 
 echo ""
 echo "Deployment of prfl@$version completed successfully!"

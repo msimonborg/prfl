@@ -8,13 +8,14 @@
 /tmp/
 /history.txt
 /Gemfile.lock
-/config.rb
 /profile_list.json
 /cookie
 /rename.exs
 /*fetch_list.json
 /data/
-/.deployment
+/.deployment/
+/test/
+/.vscode/
 
 # rspec failure tracking
 .rspec_status

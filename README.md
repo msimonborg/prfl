@@ -58,11 +58,13 @@ Pay attention to versioning. The deploy script will not run if you do not provid
 # TODO:
 - [x] Improve README
 
+- [x] Pull all production directories in the deploy shell script from environment variables.
+
 - [ ] *ADD TESTS!!!* Do this before working on any new features for production
 
-- [ ] Write a Ruby script that wraps the deploy shell script, so we can pull the version number from the `Prfl::VERSION` constant. This way, we can have one source of truth for the version number and prevent accidental bad-versioning. Move the shell script to `src` and rename it `deploy.sh`. Remove its executable permission.
+- [ ] The `--all` command is matching roast names that contain the unwanted patterns in the middle of the string as long as the string doesn't start with one of the patterns. It should not match if the string contains the patterns anywhere
 
-- [x] Pull all production directories in the deploy shell script from environment variables.
+- [ ] Write a Ruby script that wraps the deploy shell script, so we can pull the version number from the `Prfl::VERSION` constant. This way, we can have one source of truth for the version number and prevent accidental bad-versioning. Move the shell script to `src` and rename it `deploy.sh`. Remove its executable permission.
 
 - [ ] Write an install script that installs the executable in a directory that is specified in an environment variable, and then optionally executes the deploy script. Call the install script from a Ruby wrapper, a la the deploy script.
 

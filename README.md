@@ -82,4 +82,6 @@ Pay attention to versioning. The deploy script will not run if you do not provid
 
 - [ ] Add `-m --metadata` option to grab and persist metadata for all roasts
 
+- [ ] Use Airtable's API to query weight loss, post-sort yield, and colortrack readings and add the data to the merged Artisan files. This could also be done with webhooks but we need a long running web app to listen for them at a permanent URL.
+
 - [ ] Anytime we grab up-to-date metadata for all roasts, persist it. Check local metadata first whenever feasible before requesting all from the server

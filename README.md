@@ -76,7 +76,9 @@ Pay attention to versioning. The deploy script will not run if you do not provid
 
 - [ ] In `fetch_profile_data.exs`, write files to the file system in the correct sorted order (descending by most recent datetime) *or* sort them at the merge step. The goal is for merged files to be listed in the correct order when sorted by datetime of the roast
 
-- [ ] Add `-r --reference BATCHES` option to add the listed batches to the reference directory and move the ones they are replacing to the archives. Only merged profiles should be references, so it should fail if the profile is not merged *or* make an effort to merge it first
+- [ ] Add `-c --candidate BATCHES` option to copy the listed batches to the `references/candidates` directory.
+
+- [ ] Add `-r --reference BATCHES` option to copy the listed batches to the references directory and move the ones they are replacing to the archives. Only merged profiles should be references, so it should fail if the profile is not merged *or* make an effort to merge it first. It should first check if the merged file is already in `references/candidates`, and if so move that copy to references.
 
 - [ ] Add `-m --metadata` option to grab and persist metadata for all roasts
 

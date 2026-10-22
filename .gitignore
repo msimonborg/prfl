@@ -17,6 +17,7 @@
 /test/
 /.vscode/
 /counter
+/.DS_Store
 
 # rspec failure tracking
 .rspec_status

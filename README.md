@@ -60,9 +60,9 @@ Pay attention to versioning. The deploy script will not run if you do not provid
 
 - [x] Pull all production directories in the deploy shell script from environment variables.
 
-- [ ] *ADD TESTS!!!* Do this before working on any new features for production
+- [x] The `--all` command is matching roast names that contain the unwanted patterns in the middle of the string as long as the string doesn't start with one of the patterns. It should not match if the string contains the patterns anywhere
 
-- [ ] The `--all` command is matching roast names that contain the unwanted patterns in the middle of the string as long as the string doesn't start with one of the patterns. It should not match if the string contains the patterns anywhere
+- [ ] *ADD TESTS!!!* Do this before working on any new features for production
 
 - [ ] Write a Ruby script that wraps the deploy shell script, so we can pull the version number from the `Prfl::VERSION` constant. This way, we can have one source of truth for the version number and prevent accidental bad-versioning. Move the shell script to `src` and rename it `deploy.sh`. Remove its executable permission.
 

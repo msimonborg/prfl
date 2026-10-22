@@ -25,8 +25,12 @@ module Prfl
         # Exlude profiles that match Onyx Tonics' naming conventions
         profiles.filter! do |profile|
           name = profile["prflName"]
-          !name.match?(/^\d{4,}\w/) && !name.match?(/(^|\s)bi($|\s)/i)
+          !match_onyx_tonics?(name)
         end
+      end
+
+      def match_onyx_tonics?(name)
+        name.match?(/(^|\s)\d{4,}\w/) || name.match?(/(^|\s)bi($|\s)/i)
       end
 
       def update_counter

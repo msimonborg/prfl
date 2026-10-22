@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 require "prfl"
+require "prfl/cli"
+require_relative "../config"
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure

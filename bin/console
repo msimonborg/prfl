@@ -3,8 +3,6 @@
 
 require "bundler/setup"
 require "prfl"
-require "prfl/cli"
-require "json"
 
 # Comment this line if you do not want to load the config
 require_relative "../config"

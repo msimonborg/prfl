@@ -1,20 +1,19 @@
 # frozen_string_literal: true
 
-require "json"
-
 module Prfl
+  # Class for creating Artisan profile data objects
   class ArtisanData
     CALIBRATION_VALUE = -10.0
-    EXTRA_DEVICES = [25, 25, 25, 25]
-    EXTRA_NAME_1 = %w[IT IR BT2 DT2]
-    EXTRA_NAME_2 = ["Delta IT", "Delta IR", "Delta BT2", "Delta DT2"]
-    EXTRA_MATH_EXPRESSIONS = ["", "", "", ""]
-    EXTRA_DEVICE_COLORS = ["#000000", "#000000", "#000000", "#000000"]
-    EXTRA_MARKER_SIZES = [6.0, 6.0, 6.0, 6.0]
-    EXTRA_MARKERS = %w[null null null null]
-    EXTRA_LINE_WIDTHS = [1.0, 1.0, 1.0, 1.0]
-    EXTRA_LINE_STYLES = ["-", "-", "-", "-"]
-    EXTRA_DRAW_STYLES = %w[default default default default]
+    EXTRA_DEVICES = [25, 25, 25, 25].freeze
+    EXTRA_NAME_1 = %w[IT IR BT2 DT2].freeze
+    EXTRA_NAME_2 = ["Delta IT", "Delta IR", "Delta BT2", "Delta DT2"].freeze
+    EXTRA_MATH_EXPRESSIONS = ["", "", "", ""].freeze
+    EXTRA_DEVICE_COLORS = ["#000000", "#000000", "#000000", "#000000"].freeze
+    EXTRA_MARKER_SIZES = [6.0, 6.0, 6.0, 6.0].freeze
+    EXTRA_MARKERS = %w[null null null null].freeze
+    EXTRA_LINE_WIDTHS = [1.0, 1.0, 1.0, 1.0].freeze
+    EXTRA_LINE_STYLES = ["-", "-", "-", "-"].freeze
+    EXTRA_DRAW_STYLES = %w[default default default default].freeze
 
     EXTRA_CURVE_VISIBILITY = [
       false,
@@ -27,7 +26,7 @@ module Prfl
       false,
       false,
       false
-    ]
+    ].freeze
 
     attr_accessor :source, :data, :drop_index
 

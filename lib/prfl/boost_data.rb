@@ -1,11 +1,9 @@
 # frozen_string_literal: true
 
-require "json"
-
 module Prfl
   # The object that reads and stores data from a boost file
   class BoostData
-    SENSORS = %i[ir bt it dt]
+    SENSORS = %i[ir bt it dt].freeze
 
     attr_accessor :source, :data, :timex, :ir_temps, :bt_temps, :it_temps, :dt_temps, :ir_ror, :bt_ror, :it_ror, :dt_ror
 

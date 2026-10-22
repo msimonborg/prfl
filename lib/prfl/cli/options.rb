@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "optparse"
-
 module Prfl
   class CLI
     # An options parser for the CLI

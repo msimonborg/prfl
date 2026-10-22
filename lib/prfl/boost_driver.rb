@@ -1,14 +1,10 @@
 # frozen_string_literal: true
 
-require "selenium-webdriver"
-
-require_relative "logger"
-
 module Prfl
   # Wrapper around a selenium web driver
   class BoostDriver
     class CookieError < StandardError; end
-    include Logger
+    include Prfl::Logger
 
     BROWSER = :chrome
 

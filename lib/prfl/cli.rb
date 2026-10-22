@@ -1,15 +1,14 @@
 # frozen_string_literal: true
 
-require_relative "cli/all"
-require_relative "cli/list"
-require_relative "cli/merge"
-require_relative "cli/options"
-require_relative "boost_driver"
-
 module Prfl
   # Superclass of all CLI subprograms
   class CLI
-    include Logger
+    autoload :All, "prfl/cli/all"
+    autoload :List, "prfl/cli/list"
+    autoload :Merge, "prfl/cli/merge"
+    autoload :Options, "prfl/cli/options"
+
+    include Prfl::Logger
 
     attr_accessor :opts, :driver, :profile_metadata, :total_roast_count,
                   :response, :profiles, :config, :boost_dir, :artisan_dir,

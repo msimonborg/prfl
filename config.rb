@@ -4,7 +4,7 @@ dev_path = ->(path) { Pathname.new("data/#{path}").realpath.to_path }
 
 if ENV["PRFL_ENV"] == "prod"
   Prfl.config do |config|
-    config.artisan_path =  ENV["PRFL_ARTISAN_PATH"]
+    config.artisan_path = ENV["PRFL_ARTISAN_PATH"]
     config.boost_path   = ENV["PRFL_BOOST_PATH"]
     config.target_path  = ENV["PRFL_TARGET_PATH"]
   end
@@ -17,6 +17,8 @@ else
 end
 
 Prfl.config do |config|
-  config.boost_email    = ENV["PRFL_BOOST_EMAIL"]
-  config.boost_password = ENV["PRFL_BOOST_PASSWORD"]
+  config.boost_email      = ENV["PRFL_BOOST_EMAIL"]
+  config.boost_password   = ENV["PRFL_BOOST_PASSWORD"]
+  config.airtable_token   = ENV["PRFL_AIRTABLE_TOKEN"]
+  config.airtable_base_id = ENV["PRFL_AIRTABLE_BASE_ID"]
 end

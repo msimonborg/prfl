@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative "prfl/airtable"
+require_relative "prfl/airtable/request"
 require_relative "prfl/artisan_data"
 require_relative "prfl/boost_data"
 require_relative "prfl/boost_driver"
@@ -16,7 +18,9 @@ module Prfl
                   :target_path,
                   :boost_email,
                   :boost_password,
-                  :browser
+                  :browser,
+                  :airtable_token,
+                  :airtable_base_id
   end
 
   @@config = false

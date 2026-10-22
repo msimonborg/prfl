@@ -5,11 +5,8 @@ RSpec.describe Prfl::CLI::All do
     all = Prfl::CLI::All.new({})
 
     expect(all.match_onyx_tonics?("8034th roasting")).to be true
-
     expect(all.match_onyx_tonics?("BI Kamthura")).to be true
-
     expect(all.match_onyx_tonics?("Replication Profile: 8034th roasting")).to be true
-
     expect(all.match_onyx_tonics?("Replication Profile: BI Kamthura")).to be true
   end
 
@@ -17,15 +14,10 @@ RSpec.describe Prfl::CLI::All do
     all = Prfl::CLI::All.new({})
 
     expect(all.match_onyx_tonics?("7885 Decaf Fortune")).to be false
-
     expect(all.match_onyx_tonics?("Replication Profile: 7885 Decaf Fortune")).to be false
-
     expect(all.match_onyx_tonics?("7890 Replication Profile: 7885 Decaf Fortune")).to be false
-
     expect(all.match_onyx_tonics?("Decaf Fortune")).to be false
-
     expect(all.match_onyx_tonics?("Replication Profile: Decaf Fortune")).to be false
-
     expect(all.match_onyx_tonics?("7890 Replication Profile: Decaf Fortune")).to be false
   end
 

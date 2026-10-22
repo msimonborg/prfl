@@ -16,6 +16,7 @@
 /.deployment/
 /test/
 /.vscode/
+/counter
 
 # rspec failure tracking
 .rspec_status

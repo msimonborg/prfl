@@ -1,8 +1,14 @@
 # frozen_string_literal: true
 
 require "prfl"
-
 require_relative "../config"
+
+# Override the data directories in app config for testing
+Prfl.config do |config|
+  config.artisan_path = "spec/fixtures/artisan/roasts/raw"
+  config.target_path  = "spec/fixtures/artisan/roasts/merged"
+  config.boost_path   = "spec/fixtures/boost_data/raw"
+end
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure

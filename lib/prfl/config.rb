@@ -9,5 +9,6 @@ module Prfl
                   :boost_email,
                   :boost_password,
                   :browser
+    # is browser being used?
   end
 end

@@ -9,8 +9,12 @@ gem "irb", group: :development
 
 gem "rake", "~> 13.0", group: :development
 
+gem "rubocop", "~> 1.21", group: :development
+gem "rubocop-rake", group: :development
+gem "rubocop-rspec", group: :development
+
+gem "solargraph", group: :development
+
 gem "rspec", "~> 3.0", group: :test
 
-gem "rubocop", "~> 1.21", group: :development
-
-gem 'selenium-webdriver', '>= 4.51'
+gem "selenium-webdriver", ">= 4.51"

@@ -4,9 +4,9 @@ dev_path = ->(path) { Pathname.new("data/#{path}").realpath.to_path }
 
 if ENV["PRFL_ENV"] == "prod"
   Prfl.config do |config|
-    config.artisan_path =  ENV["PRFL_ARTISAN_PATH"]
-    config.boost_path   = ENV["PRFL_BOOST_PATH"]
-    config.target_path  = ENV["PRFL_TARGET_PATH"]
+    config.artisan_path = ENV.fetch("PRFL_ARTISAN_PATH", nil)
+    config.boost_path   = ENV.fetch("PRFL_BOOST_PATH", nil)
+    config.target_path  = ENV.fetch("PRFL_TARGET_PATH", nil)
   end
 else
   Prfl.config do |config|
@@ -17,6 +17,6 @@ else
 end
 
 Prfl.config do |config|
-  config.boost_email    = ENV["PRFL_BOOST_EMAIL"]
-  config.boost_password = ENV["PRFL_BOOST_PASSWORD"]
+  config.boost_email    = ENV.fetch("PRFL_BOOST_EMAIL", nil)
+  config.boost_password = ENV.fetch("PRFL_BOOST_PASSWORD", nil)
 end

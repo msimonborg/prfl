@@ -8,7 +8,13 @@ module Prfl
       attr_accessor :counter, :new_count
 
       def set_count
-        self.counter = File.read("counter").to_i
+        self.counter =
+          if File.exist?("counter")
+            File.read("counter").to_i
+          else
+            0
+          end
+
         self.new_count = total_roast_count - counter
       end
 

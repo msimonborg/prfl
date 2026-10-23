@@ -9,7 +9,7 @@ module Prfl
                     :existing_profiles
 
       def initialize(opts)
-        super(opts)
+        super
         self.batch_nums = []
         self.old_batch_nums = []
         self.new_batch_nums = []
@@ -75,7 +75,7 @@ module Prfl
           # Fix the filename and reject the profile by returning a truthy value
           batch_num = extract_batch_num(profile)
           rename_file(batch_num, existing_path, path)
-          new_batch_nums.delete(batch_num) && old_batch_nums << batch_num
+          new_batch_nums.delete(batch_num) && (old_batch_nums << batch_num)
           existing_profiles << profile
         end
       end
@@ -89,7 +89,9 @@ module Prfl
 
       def filter_new_batch_nums(profile)
         batch_nums.reject! do |num|
-          num == extract_batch_num(profile) && new_batch_nums << num
+          # If a batch_num can be extracted from the profile and matches the `num`, add the num to
+          # `new_batch_nums` and reject it from the original args
+          num == extract_batch_num(profile) && (new_batch_nums << num)
         end
       end
 

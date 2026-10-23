@@ -2,3 +2,5 @@
 
 rm -f data/artisan/roasts/merged/*
 rm -f data/boost_data/raw/*
+rm -f history.txt
+rm -f counter

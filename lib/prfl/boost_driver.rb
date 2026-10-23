@@ -45,17 +45,6 @@ module Prfl
       fail_on_empty(response)
     end
 
-    private
-
-    def fail_on_empty(response)
-      if response.empty?
-        raise CookieError,
-              "No response from Boost server. Make sure the cookie is valid."
-      else
-        response
-      end
-    end
-
     def metadata_request(count)
       <<~CMD
         curl -s 'https://boost.stronghold.coffee/rstry/profile/status/list.sq?rc=w0&prodCd=10006&page=1&pageSetCnt=#{count}&minRstTime=0&maxRstTime=1800&prflName=&grnBeanName=' \
@@ -108,6 +97,17 @@ module Prfl
       driver.find_element(tag_name: "button").click
     rescue Selenium::WebDriver::Error::NoSuchElementError
       raise Error, "Login page did not load correctly, element not found"
+    end
+
+    private
+
+    def fail_on_empty(response)
+      if response.empty?
+        raise CookieError,
+              "No response from Boost server. Make sure the cookie is valid."
+      else
+        response
+      end
     end
   end
 end

@@ -31,15 +31,33 @@ module Prfl
     end
 
     def extract_data
-      temps = data["temps"]
-
-      temps.each do |temp|
-        timex.push(temp["rstTime"].to_f)
-        ir_temps.push(temp["irFTemp"].to_f)
-        bt_temps.push(temp["internalFTemp"].to_f)
-        it_temps.push(temp["hotAirFTemp"].to_f)
-        dt_temps.push(temp["bandFTemp"].to_f)
+      data["temps"].each do |temp|
+        add_to_timex(temp)
+        add_to_ir_temps(temp)
+        add_to_bt_temps(temp)
+        add_to_it_temps(temp)
+        add_to_dt_temps(temp)
       end
+    end
+
+    def add_to_dt_temps(temp)
+      dt_temps.push(temp["bandFTemp"].to_f)
+    end
+
+    def add_to_it_temps(temp)
+      it_temps.push(temp["hotAirFTemp"].to_f)
+    end
+
+    def add_to_bt_temps(temp)
+      bt_temps.push(temp["internalFTemp"].to_f)
+    end
+
+    def add_to_ir_temps(temp)
+      ir_temps.push(temp["irFTemp"].to_f)
+    end
+
+    def add_to_timex(temp)
+      timex.push(temp["rstTime"].to_f)
     end
 
     def derive_rors
@@ -50,28 +68,33 @@ module Prfl
 
     # sensor is a symbol, one of [:ir, :bt, :it, :dt]
     def derive_ror(sensor)
-      temps = send(:"#{sensor}_temps")
+      temps  = send(:"#{sensor}_temps")
+      factor = determine_ror_factor(sensor)
 
+      temps.each_index do |index|
+        res = calculate_ror_datapoint(temps, factor, index)
+
+        send(:"#{sensor}_ror").push(res)
+      end
+    end
+
+    def calculate_ror_datapoint(temps, factor, index)
+      if index < 15
+        -1.0
+      else
+        (temps[index].to_f - temps[index - 15].to_f).round(1) * factor
+      end
+    end
+
+    def determine_ror_factor(sensor)
       # RoR values are computed over a 15 second interval, and multiplied by a
       # factor of 4.0 to produce a F/min delta value. Exception is made for IT
       # which is multiplied by a factor of 10.0/15.0 to produce a F/10sec delta
       # value so it fits inside the Y-axis range of the graph
-      factor =
-        if sensor == :it
-          10.0 / 15.0
-        else
-          4.0
-        end
-
-      temps.each_index do |i|
-        res =
-          if i < 15
-            -1.0
-          else
-            (temps[i].to_f - temps[i - 15].to_f).round(1) * factor
-          end
-
-        send(:"#{sensor}_ror").push(res)
+      if sensor == :it
+        10.0 / 15.0
+      else
+        4.0
       end
     end
   end

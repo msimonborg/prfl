@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-rm -f data/artisan/roasts/merged/*
-rm -f data/boost_data/raw/*
+rm -f data/artisan/roasts/merged/*.alog
+rm -f data/boost_data/raw/*.json
 rm -f history.txt
 rm -f counter

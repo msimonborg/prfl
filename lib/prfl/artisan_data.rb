@@ -36,14 +36,15 @@ module Prfl
 
     attr_accessor :source, :data, :drop_index
 
-    def initialize(filename, options)
+    def initialize(filename, options = {})
+      calibrate = options[:calibrate]
       self.source = File.read(filename)
       self.data = parse_source
 
       time_index = data["timeindex"]
       self.drop_index = time_index[6]
 
-      calibrate_bt if options[:calibrate] == true
+      calibrate_bt if calibrate == true
     end
 
     def merge_boost!(boost_data)
@@ -81,6 +82,11 @@ module Prfl
 
     private
 
+    def parse_source
+      json = source.gsub("'", "\"").gsub("False", "false").gsub("True", "true").gsub("None", "null")
+      JSON.parse(json)
+    end
+
     def calibrate_bt
       data["temp2"].map! do |temp|
         temp + CALIBRATION_VALUE
@@ -115,16 +121,6 @@ module Prfl
       %w[it_temps ir_temps bt_temps dt_temps].map do |sym|
         pre_pad + boost_data.send(sym) + post_pad
       end
-    end
-
-    def parse_source
-      string = source
-      string.gsub!("'", "\"")
-      string.gsub!("False", "false")
-      string.gsub!("True", "true")
-      string.gsub!("None", "null")
-
-      JSON.parse(string)
     end
   end
 end

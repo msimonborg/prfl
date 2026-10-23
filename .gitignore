@@ -12,7 +12,9 @@
 /cookie
 /rename.exs
 /*fetch_list.json
-/data/
+/data/artisan/roasts/merged/*
+/data/artisan/roasts/raw/*
+/data/boost_data/raw/*
 /.deployment/
 /test/
 /.vscode/

@@ -2,6 +2,7 @@
 
 RSpec.describe Prfl::CLI::All do
   let(:all) { described_class.new({}) }
+
   let(:profiles) do
     [
       { "prflName" => "8034th roasting" },

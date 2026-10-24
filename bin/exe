@@ -6,7 +6,8 @@ require "prfl"
 
 require_relative "../config"
 
-opts = Prfl::CLI::Options.new
+option_parser = OptionParser.new
+opts = Prfl::CLI::Options.new(option_parser)
 opts.parse!
 
 cli = Prfl::CLI.new(opts)
@@ -85,6 +86,11 @@ if opts.all
   all.driver.quit
 end
 # if opts.all
+
+# TODO: Implement the program logic to handle the candidates and references options
+# TODO: Add a check to ensure that the candidates and references are not overlapping
+cli.log "Designating batch numbers #{opts.candidates.join(", ")} as reference candidates" if opts.candidates
+cli.log "Designating batch numbers #{opts.references.join(", ")} as reference profiles" if opts.references
 
 unless opts.no_merge
   merge = cli.merge

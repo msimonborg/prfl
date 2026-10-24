@@ -9,9 +9,9 @@ gem "irb", group: :development
 
 gem "rake", "~> 13.0", group: :development
 
-gem "rubocop", "~> 1.21", group: :development
-gem "rubocop-rake", group: :development
-gem "rubocop-rspec", group: :development
+gem "rubocop", "~> 1.21", groups: %i[development test]
+gem "rubocop-rake", groups: %i[development test]
+gem "rubocop-rspec", groups: %i[development test]
 
 gem "solargraph", group: :development
 

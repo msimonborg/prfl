@@ -56,7 +56,7 @@ fi
 
 cp -r $staging_dir $deploy_dir/prfl
 
-cd prfl
+cd $deploy_dir/prfl
 bundle config set without 'development test' && bundle install
 
 rm -rf $dev_dir/.deployment

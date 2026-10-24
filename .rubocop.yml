@@ -3,6 +3,7 @@ AllCops:
   NewCops: enable
   Exclude:
     - 'test/**/*'
+    - 'vendor/**/*'
 
 Style/StringLiterals:
   EnforcedStyle: double_quotes

@@ -41,8 +41,8 @@ module Prfl
       self.target_dir = Dir.new(config.target_path)
     end
 
-    def new_boost_session
-      self.driver = Prfl::BoostDriver.new
+    def new_boost_session(driver)
+      self.driver = driver
       driver.new_session
     end
 

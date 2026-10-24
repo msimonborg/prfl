@@ -18,7 +18,7 @@ if opts.list
   list.filter_old_batch_nums
 
   unless list.batch_nums.empty?
-    list.new_boost_session
+    list.new_boost_session(Prfl::BoostDriver.new)
 
     list.log "Checking last 20 roasts for batch numbers #{list.batch_nums.join(", ")}"
 
@@ -53,7 +53,7 @@ end
 
 if opts.all
   all = cli.all
-  all.new_boost_session
+  all.new_boost_session(Prfl::BoostDriver.new)
   all.get_profile_metadata
   all.set_count
 
